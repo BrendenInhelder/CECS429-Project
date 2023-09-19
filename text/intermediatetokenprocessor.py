@@ -1,5 +1,7 @@
 from .tokenprocessor import TokenProcessor
 import re
+import nltk
+from nltk.stem import PorterStemmer
 
 class IntermediateTokenProcessor(TokenProcessor):
     """An IntermediateTokenProcessor creates terms (as a list) from tokens by splitting on hyphens
@@ -23,3 +25,6 @@ class IntermediateTokenProcessor(TokenProcessor):
             tokens[i] = newToken
         
         return tokens
+    def normalize_type(self, type : str) -> str:
+        stemmer = PorterStemmer()
+        return stemmer.stem(type)
