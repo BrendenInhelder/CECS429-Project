@@ -8,10 +8,14 @@ class OrQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
-        result = []
-        # TODO: program the merge for an OrQuery, by gathering the postings of the composed QueryComponents and
-		# merging the resulting postings.
-        return result
+        previousSet = 0
+        for component in self.components:
+            postings = set((index.get_postings(component.term)).keys())
+            if previousSet == 0:
+                previousSet = postings
+                continue
+            previousSet = previousSet.union(postings)
+        return list(previousSet)
 
     def __str__(self):
         return "(" + " OR ".join(map(str, self.components)) + ")"
