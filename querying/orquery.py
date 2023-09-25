@@ -1,3 +1,4 @@
+from querying.andquery import AndQuery
 from .querycomponent import QueryComponent
 from indexing import Index, Posting
 
@@ -8,9 +9,12 @@ class OrQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
-        previousSet = 0
+        previousSet = 0 
         for component in self.components:
-            postings = set((index.get_postings(component.term)).keys())
+            if type(component) == AndQuery:
+                postings = set(component.get_postings(index))
+            else:
+                postings = set((index.get_postings(component.term)).keys())
             if previousSet == 0:
                 previousSet = postings
                 continue

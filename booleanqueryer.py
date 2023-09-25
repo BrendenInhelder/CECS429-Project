@@ -34,9 +34,9 @@ if __name__ == "__main__":
 
     if query != 'quit':
         queryComponent = BooleanQueryParser.parse_query(query)
-        print(queryComponent)
+        print("query:", queryComponent)
         result = queryComponent.get_postings(index)
-        print(result)
+        print("result: ", result)
 
     # Uncomment if you want the vocabulary printed
     # print('Vocab:')
