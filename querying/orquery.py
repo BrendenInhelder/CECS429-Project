@@ -9,6 +9,7 @@ class OrQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
+        # TODO: need to do union without sets
         previousSet = 0 
         for component in self.components:
             if type(component) == AndQuery:
