@@ -22,8 +22,10 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     return positional_inverted_index
 
 if __name__ == "__main__":
-    corpus_path = Path()
-    # can use either txt or json...TODO: file path on system instead of project directory
+    # TODO: user input for path, hard-coded for debugging purposes
+    corpus_path = Path(r'C:\Users\Brend\OneDrive\Desktop\NPS10')
+
+    # can use either txt or json...
     #d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
 
