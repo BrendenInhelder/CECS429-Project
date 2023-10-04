@@ -37,11 +37,12 @@ if __name__ == "__main__":
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
-    if query != 'quit':
+    while query != 'quit':
         queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", queryComponent)
         result = queryComponent.get_postings(index)
         print("result: ", result)
+        query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
     # Uncomment if you want the vocabulary printed
     # print('Vocab:')
