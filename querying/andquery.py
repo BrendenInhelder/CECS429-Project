@@ -11,13 +11,39 @@ class AndQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         previousSet = 0
-        for component in self.components:
-            postings = set((index.get_postings(component.term)).keys())
-            if previousSet == 0:
-                previousSet = postings
+        previousPostings = 0
+        result = []
+        for component in self.components:            
+            result = []
+            currentPostings = list((index.get_postings(component.term)).keys())
+            if previousPostings == 0:
+                previousPostings = currentPostings
                 continue
-            previousSet = previousSet.intersection(postings)
-        return list(previousSet)
+            pprevious = 0
+            pcurrent = 0
+            while(pprevious < len(previousPostings) and pcurrent < len(currentPostings)):
+                previousDoc = previousPostings[pprevious]
+                currentDoc = currentPostings[pcurrent]
+                if previousDoc == currentDoc:
+                    # AND is true
+                    result.append(previousDoc)
+                    pprevious += 1
+                    pcurrent += 1
+                elif previousDoc < currentDoc:
+                    pprevious += 1
+                else:
+                    pcurrent += 1
+            previousPostings = result
+
+        return result
+
+        # for component in self.components:
+        #     postings = set((index.get_postings(component.term)).keys())
+        #     if previousSet == 0:
+        #         previousSet = postings
+        #         continue
+        #     previousSet = previousSet.intersection(postings)
+        # return list(previousSet)
 
     def __str__(self):
         return " AND ".join(map(str, self.components))

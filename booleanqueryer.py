@@ -2,6 +2,7 @@ from pathlib import Path
 import pprint
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
+from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream
 from querying import BooleanQueryParser
 
@@ -23,10 +24,14 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
 
 if __name__ == "__main__":
     # TODO: user input for path, hard-coded for debugging purposes
-    corpus_path = Path(r'C:\Users\Brend\OneDrive\Desktop\NPS10')
+    # corpus_path = Path() 
+    # corpus_path = Path(r'C:\Users\Brend\OneDrive\Desktop\NPS10')
+    corpus_path = Path(r'C:\Users\Brend\Documents\all-nps-sites')
+    
+
 
     # can use either txt or json...
-    #d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
+    # d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
 
     # Build the index over this directory.
@@ -41,7 +46,9 @@ if __name__ == "__main__":
         queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", queryComponent)
         result = queryComponent.get_postings(index)
-        print("result: ", result)
+        print("result: ")
+        for docID in result:
+            print("Title:", (d.get_document(Posting(docID).doc_id)).title, "ID:", docID)
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
     # Uncomment if you want the vocabulary printed
