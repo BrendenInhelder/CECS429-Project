@@ -23,7 +23,10 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
 
 if __name__ == "__main__":
     corpus_path = Path()
-    d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
+    # can use either txt or json...TODO: file path on system instead of project directory
+    #d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
+    d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+
     # Build the index over this directory.
     index = positional_inverted_index_corpus(d)
 

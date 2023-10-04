@@ -5,6 +5,7 @@ from typing import Callable, Iterable, Iterator
 
 from documents.document import Document
 from . import textfiledocument
+from . import jsonfiledocument
 from pathlib import Path
 
 class DirectoryCorpus:
@@ -56,4 +57,10 @@ class DirectoryCorpus:
         c = DirectoryCorpus(path, 
                 lambda f: f.suffix == extension, 
                 factories={extension: textfiledocument.TextFileDocument.load_from})
+        return c
+    @staticmethod
+    def load_json_directory(path, extension) -> 'DirectoryCorpus':
+        c = DirectoryCorpus(path, 
+                lambda f: f.suffix == extension, 
+                factories={extension: jsonfiledocument.JsonFileDocument.load_from})
         return c

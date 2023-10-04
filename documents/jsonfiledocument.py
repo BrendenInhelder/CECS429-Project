@@ -1,6 +1,7 @@
+import io
 from pathlib import Path
 from typing import Iterable
-from document import Document
+from .document import Document
 import json
 
 class JsonFileDocument(Document):
@@ -16,10 +17,10 @@ class JsonFileDocument(Document):
         return self.path.stem
 
     def get_content(self) -> Iterable[str]:
-        with open(self.path, 'r') as json_file:
-            json_data = json.load(json_file)
-            body_text = json_data.get("body", "")
-        return body_text
+        with open(self.path) as json_file:
+           json_data = json.load(json_file)
+           body_text = json_data.get("body", "")
+           return io.StringIO(body_text)
 
     @staticmethod
     def load_from(abs_path : Path, doc_id : int) -> 'JsonFileDocument' :
