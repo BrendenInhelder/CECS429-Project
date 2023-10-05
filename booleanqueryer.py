@@ -55,9 +55,10 @@ def get_query() -> str:
 
 if __name__ == "__main__":
     # TODO: user input for path, hard-coded for debugging purposes
+    path = r'C:\Users\Brend\Documents\all-nps-sites'
+    # path = r'C:\Users\Brend\OneDrive\Desktop\NPS10'
     # corpus_path = Path() 
-    corpus_path = Path(r'C:\Users\Brend\OneDrive\Desktop\NPS10')
-    # corpus_path = Path(r'C:\Users\Brend\Documents\all-nps-sites')
+    corpus_path = Path(path)
 
     # can use either txt or json...TODO: possibly try PDFs?
     # d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
@@ -78,6 +79,12 @@ if __name__ == "__main__":
             for docID in result:
                 # print(result) if you want to see the positions
                 print("Title:", (d.get_document(Posting(docID).doc_id)).title, "ID:", docID)
+
+                # attempt at a link
+                file_name = str((d.get_document(Posting(docID).doc_id)).title) + '.json'
+                final_path = Path(path) / file_name
+                print(f'[{"Click here to open the file"}]({final_path})')
+
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     
     # Uncomment if you want the vocabulary printed
