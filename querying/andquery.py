@@ -10,23 +10,23 @@ class AndQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
-        previousSet = 0
         previousPostings = 0
         result = []
         for component in self.components:            
             result = []
-            currentPostings = list((index.get_postings(component.term)).keys())
+            # currentPostings = list((index.get_postings(component.term)).keys())
+            currentPostings = index.get_postings(component.term)
             if previousPostings == 0:
                 previousPostings = currentPostings
                 continue
             pprevious = 0
             pcurrent = 0
             while(pprevious < len(previousPostings) and pcurrent < len(currentPostings)):
-                previousDoc = previousPostings[pprevious]
-                currentDoc = currentPostings[pcurrent]
+                previousDoc = previousPostings[pprevious].doc_id
+                currentDoc = currentPostings[pcurrent].doc_id
                 if previousDoc == currentDoc:
                     # AND is true
-                    result.append(previousDoc)
+                    result.append(previousPostings[pprevious])
                     pprevious += 1
                     pcurrent += 1
                 elif previousDoc < currentDoc:
@@ -37,12 +37,43 @@ class AndQuery(QueryComponent):
 
         return result
 
-        # for component in self.components:
-        #     postings = set((index.get_postings(component.term)).keys())
-        #     if previousSet == 0:
-        #         previousSet = postings
+        # previousPostings = 0
+        # result = []
+        # for component in self.components:            
+        #     result = []
+        #     currentPostings = list((index.get_postings(component.term)).keys())
+        #     if previousPostings == 0:
+        #         previousPostings = currentPostings
         #         continue
-        #     previousSet = previousSet.intersection(postings)
+        #     pprevious = 0
+        #     pcurrent = 0
+        #     while(pprevious < len(previousPostings) and pcurrent < len(currentPostings)):
+        #         previousDoc = previousPostings[pprevious]
+        #         currentDoc = currentPostings[pcurrent]
+        #         if previousDoc == currentDoc:
+        #             # AND is true
+        #             result.append(previousDoc)
+        #             pprevious += 1
+        #             pcurrent += 1
+        #         elif previousDoc < currentDoc:
+        #             pprevious += 1
+        #         else:
+        #             pcurrent += 1
+        #     previousPostings = result
+
+        # return result
+
+        # previousSet = 0
+        # for component in self.components:
+        #     postings = index.get_postings(component.term) # returns list of postings
+        #     postingsSet = set()
+        #     for posting in postings:
+        #         postingsSet.add(posting.doc_id)
+        #     # postings = set((index.get_postings(component.term)).keys())
+        #     if previousSet == 0:
+        #         previousSet = postingsSet
+        #         continue
+        #     previousSet = previousSet.intersection(postingsSet)
         # return list(previousSet)
 
     def __str__(self):
