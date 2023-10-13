@@ -24,32 +24,11 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
                 positional_inverted_index.vocabulary.add(term)
             else:
                 for terms in term:
-                    terms = token_processor.normalize_type(terms)
+                    # terms = token_processor.normalize_type(terms)
                     positional_inverted_index.add_term(terms, doc.id, position)
                     positional_inverted_index.vocabulary.add(terms)
             position += 1
     return positional_inverted_index
-
-def get_query() -> str:
-    #BUG: results in porter stemmer on more than one term because query not separated
-    phraseQuery = False
-    query = input('Enter a term you would like to search for(\'quit\' to exit): ')
-    if query == 'quit':
-        return query
-    if query[0] == '\"'and query[-1] == '\"':
-        phraseQuery = True
-    token_processor = IntermediateTokenProcessor()
-    query = token_processor.process_token(query)
-    print("query as a list:", query)
-    if type(query) is list:
-        # not sure how to handle this yet...what if the user searches "co-education"? Do we search for all 3? (probably)
-        query = query[0]
-    print("query pre normal:", query)
-    query = token_processor.normalize_type(query)
-    if phraseQuery: # we need to retain the quotes for the boolean query parser to recognize as phrase query
-        query = '\"' + query + '\"'
-        phraseQuery = False
-    return query
 
 if __name__ == "__main__":
     # TODO: user input for path, hard-coded for debugging purposes

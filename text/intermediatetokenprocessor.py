@@ -10,7 +10,6 @@ class IntermediateTokenProcessor(TokenProcessor):
     stemmer = PorterStemmer()
     
     def process_token(self, token : str) -> list:
-        # TODO: call normalize type from here, so no dependencies (e.g. type checking) in query classes get_postings
         tokens = [token]
         # create individual tokens with '-' as separator, but also altogether without '-'
         if '-' in token:
@@ -24,6 +23,7 @@ class IntermediateTokenProcessor(TokenProcessor):
             newToken = re.sub(r"'", "", newToken)
             newToken = re.sub(r'"', "", newToken)
             newToken = newToken.lower()
+            newToken = self.normalize_type(newToken)
             tokens[i] = newToken
         return tokens
         

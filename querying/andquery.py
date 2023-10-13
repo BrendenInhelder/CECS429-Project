@@ -17,10 +17,7 @@ class AndQuery(QueryComponent):
         result = []
         for component in self.components:            
             result = []
-            component.term = token_processor.process_token(component.term)[0]
-            if type(token_processor) is IntermediateTokenProcessor:
-                print(component.term)
-                component.term = token_processor.normalize_type(component.term)
+            component.term = token_processor.process_token(component.term)[0] # Won't this break if it's using a BasicTokenProcessor because of the index?
             currentPostings = index.get_postings(component.term)
             if previousPostings == 0:
                 previousPostings = currentPostings
