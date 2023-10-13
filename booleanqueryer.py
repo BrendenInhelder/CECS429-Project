@@ -19,12 +19,12 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         for token in token_stream:
             term = token_processor.process_token(token) 
             if type(term) is not list:
-                # term = token_processor.normalize_type(term)
+                term = token_processor.normalize_type(term)
                 positional_inverted_index.add_term(term, doc.id, position)
                 positional_inverted_index.vocabulary.add(term)
             else:
                 for terms in term:
-                    # terms = token_processor.normalize_type(terms)
+                    terms = token_processor.normalize_type(terms)
                     positional_inverted_index.add_term(terms, doc.id, position)
                     positional_inverted_index.vocabulary.add(terms)
             position += 1
