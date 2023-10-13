@@ -64,12 +64,14 @@ if __name__ == "__main__":
 
     # Build the index over this directory
     index = positional_inverted_index_corpus(d)
+    token_processor = IntermediateTokenProcessor()
+    #token_processor = BasicTokenProcessor()
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", queryComponent)
-        result = queryComponent.get_postings(index)
+        result = queryComponent.get_postings(index, token_processor)
         if len(result) == 0:
             print("No results")
         else:
