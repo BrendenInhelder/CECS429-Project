@@ -22,14 +22,12 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
                 # term = token_processor.normalize_type(term)
                 positional_inverted_index.add_term(term, doc.id, position)
                 positional_inverted_index.vocabulary.add(term)
-                position += 1
             else:
                 for terms in term:
                     # terms = token_processor.normalize_type(terms)
                     positional_inverted_index.add_term(terms, doc.id, position)
                     positional_inverted_index.vocabulary.add(terms)
-                    #TODO: how do we deal with positions of terms that technically don't exist because we created them from hyphens???
-                    position += 1
+            position += 1
     return positional_inverted_index
 
 def get_query() -> str:
