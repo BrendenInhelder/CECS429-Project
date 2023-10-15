@@ -12,7 +12,9 @@ class TermLiteral(QueryComponent):
         self.term = term
 
     def get_postings(self, index, token_processor : TokenProcessor) -> list[Posting]:
-        self.term = token_processor.process_token(self.term)[0] # Won't this break if it's using a BasicTokenProcessor because of the index?
+        self.term = token_processor.process_token(self.term) # Won't this break if it's using a BasicTokenProcessor because of the index?
+        if type(self.term) is list:
+            self.term = self.term[-1]
         return index.get_postings(self.term)
 
     def __str__(self) -> str:
