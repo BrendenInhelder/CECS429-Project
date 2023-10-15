@@ -17,7 +17,7 @@ class AndQuery(QueryComponent):
         result = []
         for component in self.components:            
             result = []
-            component.term = token_processor.process_token(component.term) # Won't this break if it's using a BasicTokenProcessor because of the index?
+            component.term = token_processor.process_token(component.term)
             if type(component.term) is list:
                 component.term = component.term[-1]
             currentPostings = index.get_postings(component.term)
