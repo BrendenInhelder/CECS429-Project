@@ -1,5 +1,6 @@
 from indexing.index import Index
 from indexing.postings import Posting
+from text.tokenprocessor import TokenProcessor
 from .querycomponent import QueryComponent
 
 class PhraseLiteral(QueryComponent):
@@ -10,25 +11,33 @@ class PhraseLiteral(QueryComponent):
     def __init__(self, terms : list[QueryComponent]):
         self.literals = terms
 
-    def get_postings(self, index) -> list[Posting]:
+    def get_postings(self, index, token_processor : TokenProcessor) -> list[Posting]:
+        # TODO: might be able to speed this up
         previousPostings = 0
         docIDs = []
         sharedIndexes = [] # holds the postings for each term
         for component in self.literals:
-            sharedIndexes.append(index.get_postings(component.term))
+
+            component.term = token_processor.process_token(component.term)
+            if type(component.term) is list:
+                component.term = component.term[-1]
+
             docIDs = []
-            currentPostings = list((index.get_postings(component.term)).keys())
+            currentPostings = index.get_postings(component.term)
+            sharedIndexes.append(currentPostings) # should be adding a list of Postings for the term e.g. [Posting(doc_id,positions), ...]
+
             if previousPostings == 0:
                 previousPostings = currentPostings
                 continue
+
             pprevious = 0
             pcurrent = 0
             while(pprevious < len(previousPostings) and pcurrent < len(currentPostings)):
-                previousDoc = previousPostings[pprevious]
-                currentDoc = currentPostings[pcurrent]
+                previousDoc = previousPostings[pprevious].doc_id
+                currentDoc = currentPostings[pcurrent].doc_id
                 if previousDoc == currentDoc:
                     # AND is true
-                    docIDs.append(previousDoc)
+                    docIDs.append(previousPostings[pprevious])
                     pprevious += 1
                     pcurrent += 1
                 elif previousDoc < currentDoc:
@@ -36,16 +45,22 @@ class PhraseLiteral(QueryComponent):
                 else:
                     pcurrent += 1
             previousPostings = docIDs
+        
         if len(docIDs) == 0:
             return docIDs
+        
         # time to perform the merge...yay
+        # TODO: might be able to speed this up
         result = []
-        for docID in docIDs: # loop through each docID to check if it has a phrase
+        for resultPostings in docIDs: # loop through each docID to check if it has a phrase
+            docID = resultPostings.doc_id
             currentDocPositions = []
-            for termPositions in sharedIndexes: # look at each term's position index, check only the current docID
-                currentDocPositions.append(termPositions[docID])
+            for postingList in sharedIndexes: # look at each term's posting list
+                for posting in postingList: # look at each posting
+                    if posting.doc_id == docID:
+                        currentDocPositions.append(posting.positions)
             if self.check_positions(currentDocPositions):
-                result.append(docID)
+                result.append(Posting(docID, currentDocPositions))
         return result
 
     def check_positions(self, currentDocPositions) -> bool:

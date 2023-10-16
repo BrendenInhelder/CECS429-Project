@@ -32,8 +32,8 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
 
 if __name__ == "__main__":
     # TODO: user input for path, hard-coded for debugging purposes
-    path = r'C:\Users\Brend\Documents\all-nps-sites'
-    # path = r'C:\Users\Brend\OneDrive\Desktop\NPS10'
+    # path = r'C:\Users\Brend\Documents\all-nps-sites'
+    path = r'C:\Users\Brend\OneDrive\Desktop\NPS10'
     # corpus_path = Path() 
     corpus_path = Path(path)
 
