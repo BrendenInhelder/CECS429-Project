@@ -1,4 +1,5 @@
 import pprint
+from querying.phraseliteral import PhraseLiteral
 from text.intermediatetokenprocessor import IntermediateTokenProcessor
 
 from text.tokenprocessor import TokenProcessor
@@ -15,12 +16,16 @@ class AndQuery(QueryComponent):
     def get_postings(self, index : Index, token_processor : TokenProcessor) -> list[Posting]:
         previousPostings = 0
         result = []
-        for component in self.components:            
+        for component in self.components:
             result = []
-            component.term = token_processor.process_token(component.term)
-            if type(component.term) is list:
-                component.term = component.term[-1]
-            currentPostings = index.get_postings(component.term)
+            if type(component) is PhraseLiteral:
+                currentPostings = component.get_postings(index, token_processor)
+            else:
+                component.term = token_processor.process_token(component.term)
+                if type(component.term) is list:
+                    component.term = component.term[-1]
+                currentPostings = index.get_postings(component.term)
+            
             if previousPostings == 0:
                 previousPostings = currentPostings
                 continue

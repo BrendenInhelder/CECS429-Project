@@ -1,4 +1,5 @@
 from querying.andquery import AndQuery
+from querying.phraseliteral import PhraseLiteral
 from text.tokenprocessor import TokenProcessor
 from .querycomponent import QueryComponent
 from indexing import Index, Posting
@@ -14,13 +15,16 @@ class OrQuery(QueryComponent):
         result = []
         for component in self.components:
             result = []
-            component.term = token_processor.process_token(component.term)
-            if type(component.term) is list:
-                component.term = component.term[-1]
-            if type(component) == AndQuery:
-                currentPostings = component.get_postings(index)
+            if type(component) is PhraseLiteral:
+                currentPostings = component.get_postings(index, token_processor)
             else:
-                currentPostings = index.get_postings(component.term)
+                if type(component) == AndQuery:
+                    currentPostings = component.get_postings(index, token_processor)
+                else:
+                    component.term = token_processor.process_token(component.term)
+                    if type(component.term) is list:
+                        component.term = component.term[-1]
+                    currentPostings = index.get_postings(component.term)
             if previousPostings == 0:
                 previousPostings = currentPostings
                 continue
