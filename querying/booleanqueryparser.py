@@ -1,4 +1,4 @@
-from . import AndQuery, OrQuery, QueryComponent, TermLiteral, PhraseLiteral
+from . import AndQuery, OrQuery, QueryComponent, TermLiteral, PhraseLiteral, NotQuery
 
 class BooleanQueryParser:
     class _StringBounds:
@@ -53,6 +53,14 @@ class BooleanQueryParser:
         # Skip past white space.
         while subquery[start_index] == ' ':
             start_index += 1
+
+        # Check if this is a NOT component
+        if subquery[start_index] == '-':
+            literal = BooleanQueryParser._find_next_literal(subquery, start_index + 1)
+            return BooleanQueryParser._Literal(
+                BooleanQueryParser._StringBounds(start_index, literal.bounds.length + 1),
+                NotQuery(literal.literal_component)
+            )
 
         # Check if this is a phrase literal
         if subquery[start_index] == '"':
