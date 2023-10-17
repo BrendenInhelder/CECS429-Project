@@ -1,4 +1,5 @@
 import pprint
+from querying.notquery import NotQuery
 from querying.phraseliteral import PhraseLiteral
 from text.intermediatetokenprocessor import IntermediateTokenProcessor
 
@@ -17,7 +18,11 @@ class AndQuery(QueryComponent):
         previousPostings = 0
         result = []
         for component in self.components:
+            isPositive = True
             result = []
+            if not component.is_positive():
+                isPositive = False
+                component = component.component
             if type(component) is PhraseLiteral:
                 currentPostings = component.get_postings(index, token_processor)
             else:
@@ -36,13 +41,18 @@ class AndQuery(QueryComponent):
                 currentDoc = currentPostings[pcurrent].doc_id
                 if previousDoc == currentDoc:
                     # AND is true
-                    result.append(previousPostings[pprevious])
+                    if isPositive:
+                        result.append(previousPostings[pprevious])
                     pprevious += 1
                     pcurrent += 1
                 elif previousDoc < currentDoc:
+                    if not isPositive:
+                        result.append(previousPostings[pprevious])
                     pprevious += 1
                 else:
                     pcurrent += 1
+            if pprevious < len(previousPostings):
+                result.extend(previousPostings[pprevious:])
             previousPostings = result
 
         return result

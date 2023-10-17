@@ -13,6 +13,6 @@ class QueryComponent(ABC):
         Retrieves a list of postings for the query component, using an Index as the source.
         """
         pass
-    def is_positive(self):
+    def is_positive(self) -> bool:
         return True
     
