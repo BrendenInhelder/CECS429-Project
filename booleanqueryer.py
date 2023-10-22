@@ -20,12 +20,10 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         for token in token_stream:
             term = token_processor.process_token(token) 
             if type(term) is not list:
-                term = token_processor.normalize_type(term)
                 positional_inverted_index.add_term(term, doc.id, position)
                 positional_inverted_index.vocabulary.add(term)
             else:
                 for terms in term:
-                    # terms = token_processor.normalize_type(terms)
                     positional_inverted_index.add_term(terms, doc.id, position)
                     positional_inverted_index.vocabulary.add(terms)
             position += 1
@@ -33,16 +31,12 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
 
 def menu():
     print("Welcome to my search engine!")
-    # print("What kind of files will you be indexing?\n\t1) .txt\n\t2) .json")
     userChoice = input("What kind of files will you be indexing?\n\t1) .txt\n\t2) .json\n\tChoice: ")
-    # path = Path(userChoice)
     if userChoice == "1":
-        print("txt sgtm")
         corpus_path = getFilePath()
         d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
         return d
     elif userChoice == "2":
-        print("json sgtm")
         corpus_path = getFilePath()
         d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
         return d
