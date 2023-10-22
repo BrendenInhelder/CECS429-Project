@@ -3,10 +3,15 @@ import pprint
 import re
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
+from indexing.diskindexwriter import DiskIndexWriter
 from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream, IntermediateTokenProcessor
 from querying import BooleanQueryParser
 
+# Testing Purposes #
+# path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
+# path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
+# path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
 
 def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     token_processor = IntermediateTokenProcessor()
@@ -51,12 +56,17 @@ def getFilePath() -> Path:
     return corpus_path
 
 if __name__ == "__main__":
+
     d = menu()
 
     # Build the index over this directory
     index = positional_inverted_index_corpus(d)
     token_processor = IntermediateTokenProcessor()
     #token_processor = BasicTokenProcessor()
+
+    diskIndexPath = "C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin"
+    diw = DiskIndexWriter()
+    diw.writeIndex(index, diskIndexPath)
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
