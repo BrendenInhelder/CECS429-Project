@@ -1,5 +1,6 @@
 from pathlib import Path
 import pprint
+import re
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from indexing.postings import Posting
@@ -30,16 +31,33 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             position += 1
     return positional_inverted_index
 
-if __name__ == "__main__":
-    # TODO: user input for path, hard-coded for debugging purposes
-    # path = r'C:\Users\Brend\Documents\all-nps-sites'
-    path = r'C:\Users\Brend\OneDrive\Desktop\NPS10'
-    # corpus_path = Path() 
-    corpus_path = Path(path)
+def menu():
+    print("Welcome to my search engine!")
+    # print("What kind of files will you be indexing?\n\t1) .txt\n\t2) .json")
+    userChoice = input("What kind of files will you be indexing?\n\t1) .txt\n\t2) .json\n\tChoice: ")
+    # path = Path(userChoice)
+    if userChoice == "1":
+        print("txt sgtm")
+        corpus_path = getFilePath()
+        d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
+        return d
+    elif userChoice == "2":
+        print("json sgtm")
+        corpus_path = getFilePath()
+        d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+        return d
+    else:
+        print("file type not supported, try again")
+        menu()
+    
+def getFilePath() -> Path:
+    userPath = input("Provide the path to index (Windows: use double backslashes or single forwardslashes): ")
+    userPath = userPath.replace('"', '')
+    corpus_path = Path(userPath)
+    return corpus_path
 
-    # can use either txt or json...TODO: possibly try PDFs?
-    # d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
-    d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+if __name__ == "__main__":
+    d = menu()
 
     # Build the index over this directory
     index = positional_inverted_index_corpus(d)
@@ -56,10 +74,6 @@ if __name__ == "__main__":
         else:
             for posting in result:
                 print("Title:", d.get_document(posting.doc_id).title)
-                # attempt at a link
-                #file_name = str((d.get_document(Posting(docID).doc_id)).title) + '.json'
-                #final_path = Path(path) / file_name
-                #print(f'[{"Click here to open the file"}]({final_path})')
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     
