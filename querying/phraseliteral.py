@@ -17,12 +17,14 @@ class PhraseLiteral(QueryComponent):
         docIDs = []
         sharedIndexes = [] # holds the postings for each term
         for component in self.literals:
-
+            # TODO: Can maybe replace some with? -> component.get_postings(index, token_processor)
             component.term = token_processor.process_token(component.term)
             if type(component.term) is list:
                 component.term = component.term[-1]
 
             docIDs = []
+            docANDTerms = {}
+            previousTermANDPostings = []
             currentPostings = index.get_postings(component.term)
             sharedIndexes.append(currentPostings) # should be adding a list of Postings for the term e.g. [Posting(doc_id,positions), ...]
 
@@ -37,14 +39,20 @@ class PhraseLiteral(QueryComponent):
                 currentDoc = currentPostings[pcurrent].doc_id
                 if previousDoc == currentDoc:
                     # AND is true
-                    docIDs.append(previousPostings[pprevious])
+                    previousTermANDPostings.append(previousPostings[pprevious])
+                    docID = previousPostings[pprevious].doc_id
+                    docIDs.append(docID)
+                    if docID not in docANDTerms:
+                        docANDTerms[docID] = [previousPostings[pprevious].positions, currentPostings[pcurrent].positions]
+                    else:
+                        docANDTerms[docID] = docANDTerms[docID].append(currentPostings[pcurrent].positions)
                     pprevious += 1
                     pcurrent += 1
                 elif previousDoc < currentDoc:
                     pprevious += 1
                 else:
                     pcurrent += 1
-            previousPostings = docIDs
+            previousPostings = previousTermANDPostings
         
         if len(docIDs) == 0:
             return docIDs
@@ -52,16 +60,30 @@ class PhraseLiteral(QueryComponent):
         # time to perform the merge...yay
         # TODO: might be able to speed this up
         result = []
-        for resultPostings in docIDs: # loop through each docID to check if it has a phrase
-            docID = resultPostings.doc_id
+
+        # attempt 2:
+        
+        for docID in docIDs:
             currentDocPositions = []
-            for postingList in sharedIndexes: # look at each term's posting list
-                for posting in postingList: # look at each posting
-                    if posting.doc_id == docID:
-                        currentDocPositions.append(posting.positions)
+            # print(docID, docANDTerms[docID])
+            currentDocPositions = docANDTerms[docID]
             if self.check_positions(currentDocPositions):
                 result.append(Posting(docID, currentDocPositions))
         return result
+
+        # attempt 1:
+        # for resultPostings in docIDs: # loop through each docID to check if it has a phrase
+        #     docID = resultPostings.doc_id
+        #     currentDocPositions = []
+        #     for postingList in sharedIndexes: # look at each term's posting list
+        #         for posting in postingList: # look at each posting
+        #             if posting.doc_id == docID:
+        #                 currentDocPositions.append(posting.positions)
+        #                 break
+        #     if self.check_positions(currentDocPositions):
+        #         result.append(Posting(docID, currentDocPositions))
+        # return result
+
 
     def check_positions(self, currentDocPositions) -> bool:
         # method to check each list of positions between terms for a phrase

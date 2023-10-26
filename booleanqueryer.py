@@ -18,9 +18,12 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     # token_processor = BasicTokenProcessor()
     positional_inverted_index = PositionalInvertedIndex()
 
+    currentDocNum = 0
     for doc in corpus:
         position = 0
-        print(f"Found document {doc.title}")
+        print(currentDocNum)
+        currentDocNum+=1
+        # print(f"Found document {doc.title}")
         token_stream = englishtokenstream.EnglishTokenStream(doc.get_content())
         for token in token_stream:
             term = token_processor.process_token(token) 
