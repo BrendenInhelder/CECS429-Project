@@ -7,6 +7,11 @@ from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream, IntermediateTokenProcessor
 from querying import BooleanQueryParser
 
+# Testing Purposes #
+# path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
+# path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
+# path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
+# path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
 
 def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     token_processor = IntermediateTokenProcessor()
@@ -68,6 +73,7 @@ if __name__ == "__main__":
         else:
             for posting in result:
                 print("Title:", d.get_document(posting.doc_id).title)
+            print("Postings length:", len(result))
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     
