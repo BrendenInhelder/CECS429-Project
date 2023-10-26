@@ -51,8 +51,6 @@ class AndQuery(QueryComponent):
                     pprevious += 1
                 else:
                     pcurrent += 1
-            if pprevious < len(previousPostings):
-                result.extend(previousPostings[pprevious:])
             previousPostings = result
 
         return result
