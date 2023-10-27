@@ -15,16 +15,8 @@ class OrQuery(QueryComponent):
         result = []
         for component in self.components:
             result = []
-            if type(component) is PhraseLiteral:
-                currentPostings = component.get_postings(index, token_processor)
-            else:
-                if type(component) == AndQuery:
-                    currentPostings = component.get_postings(index, token_processor)
-                else:
-                    component.term = token_processor.process_token(component.term)
-                    if type(component.term) is list:
-                        component.term = component.term[-1]
-                    currentPostings = index.get_postings(component.term)
+            currentPostings = component.get_postings(index, token_processor)
+
             if previousPostings == 0:
                 previousPostings = currentPostings
                 continue

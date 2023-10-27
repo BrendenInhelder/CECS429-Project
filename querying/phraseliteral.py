@@ -16,13 +16,9 @@ class PhraseLiteral(QueryComponent):
         docIDs = [] # holds the doc ids of the docs where every term is present
         docANDTerms = {} # holds all positions for each term for the docs that pass AND merge (at the end it will have ones that don't, which is why we have docIDs)
         for component in self.literals:
-            # TODO: Can maybe replace some with? -> component.get_postings(index, token_processor)
-            component.term = token_processor.process_token(component.term)
-            if type(component.term) is list:
-                component.term = component.term[-1]
+            currentPostings = component.get_postings(index, token_processor)
             docIDs = []
             previousTermANDPostings = []
-            currentPostings = index.get_postings(component.term)
 
             if previousPostings == 0:
                 previousPostings = currentPostings
