@@ -25,9 +25,11 @@ class DiskIndexWriter():
                     packed_data = struct.pack(bin_format, tftd)
                     index_on_disk_file.write(packed_data)
                     
+                    prevPos = 0
                     for pos in posting.positions:
-                        packed_data = struct.pack(bin_format, pos)
+                        packed_data = struct.pack(bin_format, pos-prevPos)
                         index_on_disk_file.write(packed_data)
+                        prevPos = pos
         
     def readIndex(self, savePath):
         # Unpacking the data for testing purposes #
