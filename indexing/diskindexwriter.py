@@ -7,19 +7,20 @@ class DiskIndexWriter():
     def writeIndex(self, index: PositionalInvertedIndex, savePath):
         # writeIndex will (hopefully) write an index to "disk" to be read
         # Leaving a lot of comments for now because it's confusing 
-        # TODO: Gaps and vocabulary
+        # TODO: vocabulary
         bin_format = 'i'
 
         with open(savePath, 'wb') as index_on_disk_file:
             for term, postingsList in index.index.items():
-                # packed_data = b''
                 dft = len(postingsList) # document frequency for term
                 packed_data = struct.pack(bin_format, dft)
                 index_on_disk_file.write(packed_data)
+                prevDoc = 0
                 for posting in postingsList:
-                    docid = posting.doc_id
+                    docid = posting.doc_id - prevDoc
                     packed_data = struct.pack(bin_format, docid)
                     index_on_disk_file.write(packed_data)
+                    prevDoc = docid
 
                     tftd = len(posting.positions) # term frequency for current doc
                     packed_data = struct.pack(bin_format, tftd)
