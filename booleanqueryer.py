@@ -71,6 +71,7 @@ if __name__ == "__main__":
     diskIndexPath = "C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin"
     diw = DiskIndexWriter()
     diw.writeIndex(index, diskIndexPath)
+    diw.readIndex(diskIndexPath)
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
