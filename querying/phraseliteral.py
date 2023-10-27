@@ -12,19 +12,17 @@ class PhraseLiteral(QueryComponent):
         self.literals = terms
 
     def get_postings(self, index, token_processor : TokenProcessor) -> list[Posting]:
-        # TODO: might be able to speed this up
         previousPostings = 0
-        docIDs = []
-        sharedIndexes = [] # holds the postings for each term
+        docIDs = [] # holds the doc ids of the docs where every term is present
+        docANDTerms = {} # holds all positions for each term for the docs that pass AND merge (at the end it will have ones that don't, which is why we have docIDs)
         for component in self.literals:
-
+            # TODO: Can maybe replace some with? -> component.get_postings(index, token_processor)
             component.term = token_processor.process_token(component.term)
             if type(component.term) is list:
                 component.term = component.term[-1]
-
             docIDs = []
+            previousTermANDPostings = []
             currentPostings = index.get_postings(component.term)
-            sharedIndexes.append(currentPostings) # should be adding a list of Postings for the term e.g. [Posting(doc_id,positions), ...]
 
             if previousPostings == 0:
                 previousPostings = currentPostings
@@ -37,28 +35,30 @@ class PhraseLiteral(QueryComponent):
                 currentDoc = currentPostings[pcurrent].doc_id
                 if previousDoc == currentDoc:
                     # AND is true
-                    docIDs.append(previousPostings[pprevious])
+                    previousTermANDPostings.append(previousPostings[pprevious])
+                    docID = previousPostings[pprevious].doc_id
+                    docIDs.append(docID)
+                    if docID not in docANDTerms:
+                        docANDTerms[docID] = [previousPostings[pprevious].positions, currentPostings[pcurrent].positions]
+                    else:
+                        docANDTerms[docID].append(currentPostings[pcurrent].positions)
                     pprevious += 1
                     pcurrent += 1
                 elif previousDoc < currentDoc:
                     pprevious += 1
                 else:
                     pcurrent += 1
-            previousPostings = docIDs
+            previousPostings = previousTermANDPostings
         
+        # no docs are related between the terms
         if len(docIDs) == 0:
             return docIDs
         
-        # time to perform the merge...yay
-        # TODO: might be able to speed this up
+        # perform the positional checking going through each doc that has a possible phrase
         result = []
-        for resultPostings in docIDs: # loop through each docID to check if it has a phrase
-            docID = resultPostings.doc_id
+        for docID in docIDs:
             currentDocPositions = []
-            for postingList in sharedIndexes: # look at each term's posting list
-                for posting in postingList: # look at each posting
-                    if posting.doc_id == docID:
-                        currentDocPositions.append(posting.positions)
+            currentDocPositions = docANDTerms[docID]
             if self.check_positions(currentDocPositions):
                 result.append(Posting(docID, currentDocPositions))
         return result
