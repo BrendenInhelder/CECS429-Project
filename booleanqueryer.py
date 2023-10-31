@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 import pprint
 import re
@@ -20,22 +21,39 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     positional_inverted_index = PositionalInvertedIndex()
 
     currentDocNum = 0
+    eucDistances = []
     for doc in corpus:
+        docTermFreq = {}
         position = 0
-        print(currentDocNum)
-        currentDocNum+=1
+        # print(currentDocNum)
+        # currentDocNum+=1
         # print(f"Found document {doc.title}")
         token_stream = englishtokenstream.EnglishTokenStream(doc.get_content())
         for token in token_stream:
-            term = token_processor.process_token(token) 
-            if type(term) is not list:
-                positional_inverted_index.add_term(term, doc.id, position)
-                positional_inverted_index.vocabulary.add(term)
+            terms = token_processor.process_token(token) 
+            if type(terms) is not list:
+                positional_inverted_index.add_term(terms, doc.id, position)
+                positional_inverted_index.vocabulary.add(terms)
+                if terms not in docTermFreq:
+                    docTermFreq[terms] = 1
+                else:
+                    docTermFreq[terms] += 1
             else:
-                for terms in term:
-                    positional_inverted_index.add_term(terms, doc.id, position)
-                    positional_inverted_index.vocabulary.add(terms)
+                for term in terms:
+                    positional_inverted_index.add_term(term, doc.id, position)
+                    positional_inverted_index.vocabulary.add(term)
+                    if term not in docTermFreq:
+                        docTermFreq[term] = 1
+                    else:
+                        docTermFreq[term] += 1
             position += 1
+        # calculate Euclidian Distance for current doc
+        eucDist = 0
+        for term in docTermFreq:
+            eucDist += (docTermFreq[term] ** 2)
+        eucDist = math.sqrt(eucDist)
+        eucDistances.append(eucDist)
+    print("Euclidean distances: ", eucDistances)
     return positional_inverted_index
 
 def menu():
@@ -66,11 +84,10 @@ if __name__ == "__main__":
     # Build the index over this directory
     index = positional_inverted_index_corpus(d)
     token_processor = IntermediateTokenProcessor()
-    #token_processor = BasicTokenProcessor()
 
     diskIndexPath = "C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin"
     diw = DiskIndexWriter()
-    diw.writeIndex(index, diskIndexPath)
+    # diw.writeIndex(index, diskIndexPath)
     # diw.readIndex(diskIndexPath)
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
