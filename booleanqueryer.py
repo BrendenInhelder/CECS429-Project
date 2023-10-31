@@ -21,8 +21,8 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     currentDocNum = 0
     for doc in corpus:
         position = 0
-        print(currentDocNum)
-        currentDocNum+=1
+        # print(currentDocNum)
+        # currentDocNum+=1
         # print(f"Found document {doc.title}")
         token_stream = englishtokenstream.EnglishTokenStream(doc.get_content())
         for token in token_stream:
