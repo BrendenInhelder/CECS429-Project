@@ -5,17 +5,19 @@ import struct
 from indexing import PositionalInvertedIndex
 
 class DiskIndexWriter():
-    def writeIndex(self, index: PositionalInvertedIndex, savePath):
-        # writeIndex will write an index to "disk" to be read
+    def writeIndex(self, index: PositionalInvertedIndex, disk_path : Path, vocab_path : Path):
+        """writeIndex will write an index to "disk" to be read"""
         # TODO: vocabulary...might work properly?
         # setup the db for the vocab
-        vocabConnection = sqlite3.connect("vocabulary.db")
+        if os.path.exists(vocab_path):
+            os.remove(vocab_path)
+        vocabConnection = sqlite3.connect(vocab_path)
         cursor = vocabConnection.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS vocab (term TEXT PRIMARY KEY, byte INTEGER)")
         vocabConnection.commit()
 
         bin_format = 'i'
-        with open(savePath, 'wb') as index_on_disk_file:
+        with open(disk_path, 'wb') as index_on_disk_file:
             for term, postingsList in index.index.items():
                 # first we store the terms byte location
                 insert_structure = "INSERT INTO vocab (term, byte) VALUES (?, ?)"

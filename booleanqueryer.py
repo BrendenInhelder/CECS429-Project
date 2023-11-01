@@ -4,7 +4,7 @@ import pprint
 import re
 import struct
 from documents import DocumentCorpus, DirectoryCorpus
-from indexing import Index, PositionalInvertedIndex
+from indexing import DiskPositionalIndex, Index, PositionalInvertedIndex
 from indexing.diskindexwriter import DiskIndexWriter
 from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream, IntermediateTokenProcessor
@@ -91,10 +91,13 @@ if __name__ == "__main__":
     index = positional_inverted_index_corpus(d)
     token_processor = IntermediateTokenProcessor()
 
-    diskIndexPath = "C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin"
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    vocabDBPath = Path("vocabulary.db")
     diw = DiskIndexWriter()
-    # diw.writeIndex(index, diskIndexPath)
+    diw.writeIndex(index, diskIndexPath, vocabDBPath)
     # diw.readIndex(diskIndexPath)
+
+    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath)
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
