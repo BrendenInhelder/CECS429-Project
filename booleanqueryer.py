@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 import pprint
 import re
+import struct
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from indexing.diskindexwriter import DiskIndexWriter
@@ -53,7 +54,12 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             eucDist += (docTermFreq[term] ** 2)
         eucDist = math.sqrt(eucDist)
         eucDistances.append(eucDist)
-    print("Euclidean distances: ", eucDistances)
+    # storing all euclidian distances in binary file
+    bin_format = 'd'
+    with open("docWeights.bin", 'wb') as doc_weights_file:
+        for eucDistance in eucDistances:
+            packed_data = struct.pack(bin_format, eucDistance)
+            doc_weights_file.write(packed_data)
     return positional_inverted_index
 
 def menu():
