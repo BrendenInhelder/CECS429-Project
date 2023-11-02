@@ -97,13 +97,13 @@ if __name__ == "__main__":
     diw.writeIndex(index, diskIndexPath, vocabDBPath)
     # diw.readIndex(diskIndexPath)
 
-    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath)
+    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
 
     query = input('Enter a term you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", queryComponent)
-        result = queryComponent.get_postings(index, token_processor)
+        result = queryComponent.get_postings(diskIndex, token_processor)
         if len(result) == 0:
             print("No results")
         else:

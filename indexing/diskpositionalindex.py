@@ -17,17 +17,30 @@ class DiskPositionalIndex(Index):
     def get_postings(self, term : str) -> Iterable[Posting]:
         """Retrieves a sequence from disk of Postings of documents that contain the given term."""
         # TODO: only retrieves doc frequency as a proof of concept
-        position = self.get_term_position("park")
-        # print("position:", position)
+        postingsResult = []
+        position = self.get_term_position(term)
+        if position == -1:
+            return postingsResult
         with open(self.index_path, "rb") as diskIndexFile:
             diskIndexFile.seek(position)
-            packed_data = diskIndexFile.read(4)
-            unpacked_data = struct.unpack('i', packed_data)
-            print("doc frequency for term:", unpacked_data[0])
-        pass
+            dft = struct.unpack('i', diskIndexFile.read(4))[0]
+            previousDocID = 0 # for gaps w/ doc IDs
+            for i in range(dft): # loop through dft times (and gather each docs info)
+                currentDocID = (struct.unpack('i', diskIndexFile.read(4))[0])+previousDocID
+                previousDocID = currentDocID
+                tftd = struct.unpack('i', diskIndexFile.read(4))[0]
+                previousPos = 0 # for gaps w/ positions
+                positions = [] # add all at the end to the Posting
+                for j in range(tftd): # loop through tftd times (and gather each position)
+                    currentPos = (struct.unpack('i', diskIndexFile.read(4))[0])+previousPos
+                    previousPos = currentPos
+                    positions.append(currentPos)
+                postingsResult.append(Posting(currentDocID, positions))
+        return postingsResult
 
     def get_term_position(self, term : str):
         """Returns the terms position in the binary index on disk using the vocabulary db"""
+        # should we keep the connection open with the db the entire runtime?
         connection = sqlite3.connect(self.vocab_path)
         cursor = connection.cursor()
         cursor.execute("SELECT byte FROM vocab WHERE term = ?", (term,))

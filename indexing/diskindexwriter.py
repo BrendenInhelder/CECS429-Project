@@ -29,10 +29,11 @@ class DiskIndexWriter():
                 index_on_disk_file.write(packed_data)
                 prevDoc = 0
                 for posting in postingsList:
-                    docid = posting.doc_id - prevDoc
+                    actualid = posting.doc_id
+                    docid = actualid - prevDoc
                     packed_data = struct.pack(bin_format, docid)
                     index_on_disk_file.write(packed_data)
-                    prevDoc = docid
+                    prevDoc = actualid
 
                     tftd = len(posting.positions) # term frequency for current doc
                     packed_data = struct.pack(bin_format, tftd)
