@@ -14,7 +14,7 @@ class DiskPositionalIndex(Index):
         self.index_path = index_path
         self.vocab_path = vocab_path
 
-    def get_postings_without_positions(self, term : str) -> Iterable[Posting]:
+    def get_postings(self, term : str) -> Iterable[Posting]:
         """For a given term, retrieves the postings WITHOUT positions from disk"""
         # TODO: WIP, must properly skip
         postingsResult = []
@@ -34,7 +34,7 @@ class DiskPositionalIndex(Index):
                 diskIndexFile.seek(tftd*4, 1) # first arg: skip the positions for current doc, second arg: 1 means from current file position
         return postingsResult
         
-    def get_postings(self, term : str) -> Iterable[Posting]:
+    def get_postings_with_positions(self, term : str) -> Iterable[Posting]:
         """For a given term, retrieves the postings WITH positions from disk"""
         postingsResult = []
         position = self.get_term_position(term)
