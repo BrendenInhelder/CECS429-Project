@@ -89,12 +89,14 @@ if __name__ == "__main__":
 
     # Build the index over this directory
     index = positional_inverted_index_corpus(d)
+    print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
 
     diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    vocabDBPath = Path("vocabulary.db")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
     diw = DiskIndexWriter()
     diw.writeIndex(index, diskIndexPath, vocabDBPath)
+    print("*******Done Writing Index to Disk*******")
     # diw.readIndex(diskIndexPath)
 
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works

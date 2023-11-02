@@ -7,7 +7,13 @@ from indexing import PositionalInvertedIndex
 class DiskIndexWriter():
     def writeIndex(self, index: PositionalInvertedIndex, disk_path : Path, vocab_path : Path):
         """writeIndex will write an index to "disk" to be read"""
-        # TODO: vocabulary...might work properly?
+        # first allow the user to decide if an already existing disk index may be used (to save time)
+        # we also make a (perhaps risky) assumption that the vocab already exists if the index on disk does...but that's for the user to worry about for now (:
+        if os.path.exists(disk_path):
+            skip = input("The index disk path already exists, would you like to reuse it (y/n)")
+            skip = skip.lower()
+            if skip == 'y':
+                return     
         # setup the db for the vocab
         if os.path.exists(vocab_path):
             os.remove(vocab_path)

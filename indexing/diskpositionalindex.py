@@ -14,9 +14,53 @@ class DiskPositionalIndex(Index):
         self.index_path = index_path
         self.vocab_path = vocab_path
 
+    def get_postings_skipping(self, term : str) -> Iterable[Posting]:
+        """For a given term, retrieves the postings WITHOUT positions from disk"""
+        # This method is meant to replace get_postings_without_positions logic once skipping works properly
+        # TODO: WIP, must properly skip
+        postingsResult = []
+        position = self.get_term_position(term)
+        if position == -1:
+            return postingsResult
+        with open(self.index_path, "rb") as diskIndexFile:
+            diskIndexFile.seek(position)
+            dft = struct.unpack('i', diskIndexFile.read(4))[0]
+            previousDocID = 0 # for gaps w/ doc IDs
+            for i in range(dft): # loop through dft times (and gather each docs info)
+                currentDocID = (struct.unpack('i', diskIndexFile.read(4))[0])+previousDocID
+                previousDocID = currentDocID
+                postingsResult.append(Posting(currentDocID))
+                tftd = struct.unpack('i', diskIndexFile.read(4))[0]
+                # TODO: skipping, need to test...might be off one byte
+                diskIndexFile.seek(tftd*4, 1) # first arg: skip the positions for current doc, second arg: 1 means from current file position
+        return postingsResult
+
+    def get_postings_without_positions(self, term : str) -> Iterable[Posting]:
+        """For a given term, retrieves the postings WITHOUT positions from disk"""
+        # TODO: proof of concept, skip over bytes instead of reading through positions
+        postingsResult = []
+        position = self.get_term_position(term)
+        if position == -1:
+            return postingsResult
+        with open(self.index_path, "rb") as diskIndexFile:
+            diskIndexFile.seek(position)
+            dft = struct.unpack('i', diskIndexFile.read(4))[0]
+            previousDocID = 0 # for gaps w/ doc IDs
+            for i in range(dft): # loop through dft times (and gather each docs info)
+                currentDocID = (struct.unpack('i', diskIndexFile.read(4))[0])+previousDocID
+                previousDocID = currentDocID
+                tftd = struct.unpack('i', diskIndexFile.read(4))[0]
+                previousPos = 0 # for gaps w/ positions
+                positions = [] # add all at the end to the Posting
+                for j in range(tftd): # loop through tftd times (and gather each position)
+                    currentPos = (struct.unpack('i', diskIndexFile.read(4))[0])+previousPos
+                    previousPos = currentPos
+                    positions.append(currentPos)
+                postingsResult.append(Posting(currentDocID))
+        return postingsResult
+        
     def get_postings(self, term : str) -> Iterable[Posting]:
-        """Retrieves a sequence from disk of Postings of documents that contain the given term."""
-        # TODO: only retrieves doc frequency as a proof of concept
+        """For a given term, retrieves the postings WITH positions from disk"""
         postingsResult = []
         position = self.get_term_position(term)
         if position == -1:
