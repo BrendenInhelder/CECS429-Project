@@ -24,7 +24,7 @@ class AndQuery(QueryComponent):
             if not component.is_positive():
                 isPositive = False
                 component = component.component
-            currentPostings = component.get_postings(index, token_processor)
+            currentPostings = component.get_postings_without_positions(index, token_processor)
 
             if previousPostings == 0:
                 previousPostings = currentPostings

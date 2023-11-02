@@ -10,12 +10,6 @@ from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream, IntermediateTokenProcessor
 from querying import BooleanQueryParser
 
-# Testing Purposes #
-# path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
-# path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
-# path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
-# path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
-
 def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     token_processor = IntermediateTokenProcessor()
     # token_processor = BasicTokenProcessor()
@@ -84,6 +78,18 @@ def getFilePath() -> Path:
     return corpus_path
 
 if __name__ == "__main__":
+    # Testing Purposes #
+    # path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
+    # path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
+    # path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
+    # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
+
+    # default paths for all nps index and vocab
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+
+    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     d = menu()
 
@@ -92,8 +98,6 @@ if __name__ == "__main__":
     print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
 
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
     diw = DiskIndexWriter()
     diw.writeIndex(index, diskIndexPath, vocabDBPath)
     print("*******Done Writing Index to Disk*******")
