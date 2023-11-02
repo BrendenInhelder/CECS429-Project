@@ -26,6 +26,13 @@ class PositionalInvertedIndex(Index):
 
     def get_postings(self, term : str) -> list[Posting]:
         """Returns a list of Postings for all documents that contain the given term."""
+        # TODO: currently both are the same to allow in memory to still function...change this one to only return doc ids (w/out positions)
+        if term not in self.index:
+            return []
+        return self.index[term]
+    
+    def get_postings_with_positions(self, term : str) -> list[Posting]:
+        """Returns a list of Postings for all documents that contain the given term."""
         if term not in self.index:
             return []
         return self.index[term]
