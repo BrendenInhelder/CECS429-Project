@@ -9,6 +9,7 @@ from indexing.diskindexwriter import DiskIndexWriter
 from indexing.postings import Posting
 from text import BasicTokenProcessor, englishtokenstream, IntermediateTokenProcessor
 from querying import BooleanQueryParser
+from text.tokenprocessor import TokenProcessor
 
 def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     token_processor = IntermediateTokenProcessor()
@@ -106,7 +107,7 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def ranked_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
-    """performs ranked retrieval queries, TODO: currently just boolean retrieval"""
+    """performs ranked retrieval queries, TODO: implement ranked_retrieval"""
     # Build the index over this directory
     print("***************Indexing*****************")
     index = positional_inverted_index_corpus(d)
@@ -121,9 +122,10 @@ def ranked_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path
 
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
-        queryComponent = BooleanQueryParser.parse_query(query)
-        print("query:", queryComponent)
-        result = queryComponent.get_postings(diskIndex, token_processor)
+        # queryComponent = BooleanQueryParser.parse_query(query)
+        print("query:", query)
+        # result = queryComponent.get_postings(diskIndex, token_processor)
+        result = ranked_retrieval(diskIndex, token_processor, query)
         if len(result) == 0:
             print("No results")
         else:
@@ -132,6 +134,21 @@ def ranked_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path
             print("Postings length:", len(result))
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
+
+def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str) -> list:
+    """performs ranked retrieval given an index, token processor, and a query as a bag of words
+    Pseudocode/plan:
+    for each term t in the query:
+        Calculate wqt, using the formula: wqt = ln(1 + N/dft)
+        For each document d in t's postings list:
+            Calculate wdt = 1 + ln(tftd)
+            Acquire an accumulator A_d for document d
+            Increase the accumulator by wqt x wdt
+    for each accumulator A_d:
+        divide A_d by L_d, which DiskPositionalIndex class should be able to read from docWeights.bin file.
+        put the quotient into a priority queue
+    Using the priority queue, return the top 10 documents and their scores."""
+    return []
 
 if __name__ == "__main__":
     # Testing Purposes #
@@ -148,6 +165,6 @@ if __name__ == "__main__":
     # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     d = menu()
-    boolean_queries(d, diskIndexPath, vocabDBPath)
-    # ranked_queries(d, diskIndexPath, vocabDBPath)
+    # boolean_queries(d, diskIndexPath, vocabDBPath)
+    ranked_queries(d, diskIndexPath, vocabDBPath)
 
