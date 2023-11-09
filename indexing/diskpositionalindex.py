@@ -27,8 +27,8 @@ class DiskPositionalIndex(Index):
             for i in range(dft): # loop through dft times (and gather each docs info)
                 currentDocID = (struct.unpack('i', diskIndexFile.read(4))[0])+previousDocID
                 previousDocID = currentDocID
-                postingsResult.append(Posting(currentDocID))
                 tftd = struct.unpack('i', diskIndexFile.read(4))[0]
+                postingsResult.append(Posting(doc_id=currentDocID, tftd=tftd))
                 diskIndexFile.seek(tftd*4, 1) # first arg: skip the positions for current doc, second arg: 1 means from current file position
         return postingsResult
         
