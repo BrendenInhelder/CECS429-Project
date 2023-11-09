@@ -16,7 +16,6 @@ class DiskPositionalIndex(Index):
 
     def get_postings(self, term : str) -> Iterable[Posting]:
         """For a given term, retrieves the postings WITHOUT positions from disk"""
-        # TODO: WIP, must properly skip
         postingsResult = []
         position = self.get_term_position(term)
         if position == -1:
@@ -30,7 +29,6 @@ class DiskPositionalIndex(Index):
                 previousDocID = currentDocID
                 postingsResult.append(Posting(currentDocID))
                 tftd = struct.unpack('i', diskIndexFile.read(4))[0]
-                # TODO: skipping, need to test...might be off one byte
                 diskIndexFile.seek(tftd*4, 1) # first arg: skip the positions for current doc, second arg: 1 means from current file position
         return postingsResult
         

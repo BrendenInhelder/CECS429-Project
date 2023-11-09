@@ -148,6 +148,11 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         divide A_d by L_d, which DiskPositionalIndex class should be able to read from docWeights.bin file.
         put the quotient into a priority queue
     Using the priority queue, return the top 10 documents and their scores."""
+    # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
+    # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d (TODO: add posting field that holds tftd)
+    # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
+    N = 36000 # rough estimate, can get exact later
+
     return []
 
 if __name__ == "__main__":
