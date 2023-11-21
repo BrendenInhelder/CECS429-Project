@@ -161,7 +161,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         for d in t_postings:
             tftd = d.tftd
             wdt = 1 + math.log(tftd)
-            print("wDt(", dir.get_document(d.doc_id).title, ") = ", wdt, sep="")
+            print("wDt(", dir.get_document(d.doc_id).title, " | ID: ", dir.get_document(d.doc_id).id, ") = ", wdt, sep="")
     return []
 
 if __name__ == "__main__":
