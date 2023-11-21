@@ -156,7 +156,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         t_postings = index.get_postings(t)
         dft = len(t_postings)
         wqt = math.log(1+(N/dft))
-        print("wqt:", wqt)
+        print(dft, " postings for term \"", t, "\" with wqt = ", wqt, sep="")
     return []
 
 if __name__ == "__main__":
@@ -167,12 +167,12 @@ if __name__ == "__main__":
     # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
 
     # default paths for all nps index and vocab
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
+    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
 
     # paths for NPS10
-    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     d = menu()
     # boolean_queries(d, diskIndexPath, vocabDBPath)
