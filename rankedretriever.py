@@ -149,7 +149,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
     N = 36803 # TODO: rough estimate, need exact (dynamically)
-    accumulators = {}
+    accumulators = {} # {doc_id -> A_d}
     query = query.split()
     for t in query:
         print("t before processing:", t)
@@ -162,6 +162,14 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
             tftd = d.tftd
             wdt = 1 + math.log(tftd)
             print("wDt(", dir.get_document(d.doc_id).title, " | ID: ", dir.get_document(d.doc_id).id, ") = ", wdt, sep="")
+            A_d = 0
+            if d.doc_id not in accumulators:
+                A_d = wqt * wdt
+                accumulators[d.doc_id] = A_d
+            else:
+                A_d = accumulators[d.doc_id]
+                A_d += wqt * wdt
+                accumulators[d.doc_id] = A_d
     return []
 
 if __name__ == "__main__":
