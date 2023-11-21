@@ -103,7 +103,6 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
             for posting in result:
                 print("Title:", d.get_document(posting.doc_id).title)
             print("Postings length:", len(result))
-
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
@@ -120,6 +119,14 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
 
+    retrievalOption = "-1"
+    while (retrievalOption != "1" or retrievalOption != "2"):
+        retrievalOption = input("Ranked (1) or Probabilistic (2) Retrieval? Exit (0): ")
+        if retrievalOption == "0":
+            return
+        if retrievalOption != "1" or retrievalOption != "2":
+            print("Invalid input. Try again...")
+
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         print("query:", query)
@@ -133,6 +140,8 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
+def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+    return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
@@ -181,14 +190,24 @@ if __name__ == "__main__":
     # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
 
     # default paths for all nps index and vocab
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
+    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
 
     # paths for NPS10
-    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     dir = menu()
-    # boolean_queries(dir, diskIndexPath, vocabDBPath)
-    ranked_queries(dir, diskIndexPath, vocabDBPath)
-
+    query_type = "-1"
+    while query_type != "1" or query_type != "2":
+        query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
+        if query_type == "1":
+            boolean_queries(dir, diskIndexPath, vocabDBPath)
+            break
+        elif query_type == "2":
+            ranked_queries(dir, diskIndexPath, vocabDBPath)
+            break
+        elif query_type == "0":
+            break
+        else:
+            print("Invalid input. Try again...")
