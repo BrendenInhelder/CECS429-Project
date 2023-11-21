@@ -103,11 +103,11 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
-def ranked_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
+def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
     """performs ranked retrieval queries, TODO: implement ranked_retrieval"""
     # Build the index over this directory
     print("***************Indexing*****************")
-    index = positional_inverted_index_corpus(d)
+    index = positional_inverted_index_corpus(dir)
     print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
 
@@ -122,17 +122,17 @@ def ranked_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path
         # queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", query)
         # result = queryComponent.get_postings(diskIndex, token_processor)
-        result = ranked_retrieval(diskIndex, token_processor, query)
+        result = ranked_retrieval(diskIndex, token_processor, query, dir)
         if len(result) == 0:
             print("No results")
         else:
             for posting in result:
-                print("Title:", d.get_document(posting.doc_id).title)
+                print("Title:", dir.get_document(posting.doc_id).title)
             print("Postings length:", len(result))
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
-def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str) -> list:
+def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     """performs ranked retrieval given an index, token processor, and a query as a bag of words
     Pseudocode/plan:
     for each term t in the query:
@@ -149,14 +149,19 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
     N = 36803 # TODO: rough estimate, need exact (dynamically)
+    accumulators = {}
     query = query.split()
     for t in query:
-        print("t:", t)
+        print("t before processing:", t)
         t = token_processor.process_token(t)[0]
         t_postings = index.get_postings(t)
         dft = len(t_postings)
         wqt = math.log(1+(N/dft))
-        print(dft, " postings for term \"", t, "\" with wqt = ", wqt, sep="")
+        print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
+        for d in t_postings:
+            tftd = d.tftd
+            wdt = 1 + math.log(tftd)
+            print("wDt(", dir.get_document(d.doc_id).title, ") = ", wdt, sep="")
     return []
 
 if __name__ == "__main__":
@@ -174,7 +179,7 @@ if __name__ == "__main__":
     diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
     vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
-    d = menu()
-    # boolean_queries(d, diskIndexPath, vocabDBPath)
-    ranked_queries(d, diskIndexPath, vocabDBPath)
+    dir = menu()
+    # boolean_queries(dir, diskIndexPath, vocabDBPath)
+    ranked_queries(dir, diskIndexPath, vocabDBPath)
 
