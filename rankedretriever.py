@@ -21,9 +21,6 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     for doc in corpus:
         docTermFreq = {}
         position = 0
-        # print(currentDocNum)
-        # currentDocNum+=1
-        # print(f"Found document {doc.title}")
         token_stream = englishtokenstream.EnglishTokenStream(doc.get_content())
         for token in token_stream:
             terms = token_processor.process_token(token) 
@@ -149,10 +146,17 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         put the quotient into a priority queue
     Using the priority queue, return the top 10 documents and their scores."""
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
-    # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d (TODO: add posting field that holds tftd)
+    # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
-    N = 36000 # rough estimate, can get exact later
-
+    N = 36803 # TODO: rough estimate, need exact (dynamically)
+    query = query.split()
+    for t in query:
+        print("t:", t)
+        t = token_processor.process_token(t)[0]
+        t_postings = index.get_postings(t)
+        dft = len(t_postings)
+        wqt = math.log(1+(N/dft))
+        print("wqt:", wqt)
     return []
 
 if __name__ == "__main__":
@@ -166,6 +170,7 @@ if __name__ == "__main__":
     diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
     vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
 
+    # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
     # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
