@@ -19,6 +19,10 @@ class JsonFileDocument(Document):
         with open(self.path, encoding='utf-8') as json_file:
             json_data = json.load(json_file)
             return json_data.get("title", "")
+    
+    @property
+    def file_name(self) -> str:
+        return (str(self.path.stem) + ".json")
 
     def get_content(self) -> Iterable[str]:
         with open(self.path, encoding='utf-8') as json_file:

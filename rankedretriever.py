@@ -148,7 +148,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
-    N = len(dir)
+    N = len(dir) # for all nps, should be 36803
     accumulators = {} # {doc_id -> A_d}
     query = query.split()
     for t in query:
@@ -161,7 +161,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         for d in t_postings:
             tftd = d.tftd
             wdt = 1 + math.log(tftd)
-            print("wDt(", dir.get_document(d.doc_id).title, " | ID: ", dir.get_document(d.doc_id).id, ") = ", wdt, sep="")
+            print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
             A_d = 0
             if d.doc_id not in accumulators:
                 A_d = wqt * wdt
@@ -171,7 +171,8 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
     for A_d in accumulators:
-        print(A_d)
+        L_d = 0 # TODO: how do we get this...
+        file_name = dir.get_document(Posting(A_d).doc_id).file_name
     return []
 
 if __name__ == "__main__":

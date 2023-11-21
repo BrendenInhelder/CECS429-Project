@@ -12,6 +12,10 @@ class TextFileDocument(Document):
     @property
     def title(self) -> str:
         return self.path.stem
+    
+    @property
+    def file_name(self) -> str:
+        return (str(self.path.stem) + ".txt")
 
     # returns TextIOWrapper
     def get_content(self) -> Iterable[str]:

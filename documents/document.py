@@ -16,5 +16,9 @@ class Document(ABC):
         """The title of the document, for displaying to the user."""
         pass
 
+    def file_name(self) -> str:
+        """File name of the document, for displaying to the user."""
+        pass
+
     def __str__(self) -> str:
         return f"{self.title} (ID {self.id})"
