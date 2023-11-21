@@ -16,6 +16,7 @@ class Document(ABC):
         """The title of the document, for displaying to the user."""
         pass
 
+    @abstractmethod
     def file_name(self) -> str:
         """File name of the document, for displaying to the user."""
         pass
