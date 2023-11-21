@@ -45,7 +45,8 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         # TODO: somehow Euclidean distance is far off from desired
         eucDist = 0
         for term in docTermFreq:
-            eucDist += (docTermFreq[term] ** 2)
+            wdt = 1 + math.log10(docTermFreq[term])
+            eucDist += (wdt ** 2)
         eucDist = math.sqrt(eucDist)
         eucDistances.append(eucDist)
     # storing all euclidian distances in binary file
@@ -159,6 +160,8 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
         t = token_processor.process_token(t)[0]
         t_postings = index.get_postings(t)
         dft = len(t_postings)
+        if dft == 0:
+            continue
         wqt = math.log(1+(N/dft))
         print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
         for d in t_postings:
