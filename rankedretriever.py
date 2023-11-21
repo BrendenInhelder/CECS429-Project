@@ -170,9 +170,11 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
                 A_d = accumulators[d.doc_id]
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
-    for A_d in accumulators:
-        L_d = 0 # TODO: how do we get this...
-        file_name = dir.get_document(Posting(A_d).doc_id).file_name
+    with open("docWeights.bin", "rb") as doc_weights_file:
+        for A_d in accumulators:
+            offset = A_d * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
+            doc_weights_file.seek(offset)
+            L_d = struct.unpack('d', doc_weights_file.read(8))[0]
     return []
 
 if __name__ == "__main__":
