@@ -122,38 +122,24 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
-        # queryComponent = BooleanQueryParser.parse_query(query)
         print("query:", query)
-        # result = queryComponent.get_postings(diskIndex, token_processor)
         result = ranked_retrieval(diskIndex, token_processor, query, dir)
         if len(result) == 0:
             print("No results")
         else:
-            for posting in result:
-                print("Title:", dir.get_document(posting.doc_id).title)
-            print("Postings length:", len(result))
+            print("\nResults:")
+            for tuple in result: # tuple : (score, doc_id)
+                print(dir.get_document(tuple[1]).title, " (", dir.get_document(tuple[1]).file_name, ", ID ", dir.get_document(tuple[1]).id, ")", ") = ", tuple[0], sep="")
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
-    """performs ranked retrieval given an index, token processor, and a query as a bag of words
-    Pseudocode/plan:
-    for each term t in the query:
-        Calculate wqt, using the formula: wqt = ln(1 + N/dft)
-        For each document d in t's postings list:
-            Calculate wdt = 1 + ln(tftd)
-            Acquire an accumulator A_d for document d
-            Increase the accumulator by wqt x wdt
-    for each accumulator A_d:
-        divide A_d by L_d, which DiskPositionalIndex class should be able to read from docWeights.bin file.
-        put the quotient into a priority queue
-    Using the priority queue, return the top 10 documents and their scores."""
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
     N = len(dir) # for all nps, should be 36803
     accumulators = {} # {doc_id -> A_d}
-    priority_queue = [] # (doc_id, A_d/L_d)
+    priority_queue = [] # (A_d/L_d, doc_id)
     query = query.split()
     for t in query:
         print("t before processing:", t)
@@ -185,8 +171,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
             A_d = accumulators[doc_id]
             heapq.heappush(priority_queue, (A_d / L_d, doc_id))
     top_10 = heapq.nlargest(10, priority_queue)
-    print("Top 10 documents:", top_10)
-    return []
+    return top_10
 
 if __name__ == "__main__":
     # Testing Purposes #
