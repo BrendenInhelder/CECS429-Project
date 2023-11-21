@@ -3,6 +3,7 @@ from pathlib import Path
 import pprint
 import re
 import struct
+import heapq
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import DiskPositionalIndex, Index, PositionalInvertedIndex
 from indexing.diskindexwriter import DiskIndexWriter
@@ -41,6 +42,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
                         docTermFreq[term] += 1
             position += 1
         # calculate Euclidian Distance for current doc
+        # TODO: somehow Euclidean distance is far off from desired
         eucDist = 0
         for term in docTermFreq:
             eucDist += (docTermFreq[term] ** 2)
@@ -150,6 +152,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
     N = len(dir) # for all nps, should be 36803
     accumulators = {} # {doc_id -> A_d}
+    priority_queue = [] # (doc_id, A_d/L_d)
     query = query.split()
     for t in query:
         print("t before processing:", t)
@@ -171,10 +174,15 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
     with open("docWeights.bin", "rb") as doc_weights_file:
-        for A_d in accumulators:
-            offset = A_d * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
+        for doc_id in accumulators:
+            offset = doc_id * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
             doc_weights_file.seek(offset)
             L_d = struct.unpack('d', doc_weights_file.read(8))[0]
+            print("Ld(", dir.get_document(doc_id).title, " (", dir.get_document(doc_id).file_name, ", ID ", dir.get_document(doc_id).id, ")", ") = ", L_d, sep="")
+            A_d = accumulators[doc_id]
+            heapq.heappush(priority_queue, (A_d / L_d, doc_id))
+    top_10 = heapq.nlargest(10, priority_queue)
+    print("Top 10 documents:", top_10)
     return []
 
 if __name__ == "__main__":
@@ -185,12 +193,12 @@ if __name__ == "__main__":
     # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
 
     # default paths for all nps index and vocab
-    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
-    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
 
     # paths for NPS10
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
+    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     dir = menu()
     # boolean_queries(dir, diskIndexPath, vocabDBPath)
