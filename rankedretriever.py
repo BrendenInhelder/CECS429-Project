@@ -142,7 +142,13 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
 def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
-    
+    """The same as ranked retrieval but we have different computations for wdt, wqt, and L_d
+    wqt = max[0.1, ln((N-dft+0.5)/(dft+0.5))]
+    wdt = (2.2*tftd)/(1.2*(0.25+0.75*(docLength_d/docLength_A))+tftd)
+    L_d = 1
+    docLength_d = # of tokens in doc d TODO: must implement a way to retrieve/calc
+    docLength_A = average # of tokens in any doc TODO: must implement->possibly at index creation
+                and make it a index field/property"""
     return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
