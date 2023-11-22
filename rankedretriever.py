@@ -141,6 +141,8 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+    # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
+    
     return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
