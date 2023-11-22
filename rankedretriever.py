@@ -17,6 +17,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     # token_processor = BasicTokenProcessor()
     positional_inverted_index = PositionalInvertedIndex()
     doc_length_A = 0 # average num of tokens for any doc, useful for probabilistic retrieval
+    doc_length_D = {} # num of tokens for each doc d (doc_id->doc_length_d)
     eucDistances = []
     for doc in corpus:
         docTermFreq = {}
@@ -52,6 +53,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         eucDistances.append(eucDist)
         # update the average doc length, still need to average at end
         doc_length_A += doc_length_d
+        doc_length_D[doc.id] = doc_length_d
     # storing all euclidian distances in binary file
     bin_format = 'd'
     with open("docWeights.bin", 'wb') as doc_weights_file:
@@ -61,6 +63,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     # final average of doc lengths for any doc
     doc_length_A = doc_length_A / len(dir)
     positional_inverted_index.set_doc_length_A(doc_length_A)
+    positional_inverted_index.set_doc_length_D(doc_length_D)
     return positional_inverted_index
 
 def menu():
@@ -123,7 +126,7 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
     diw.writeIndex(index, diskIndexPath, vocabDBPath)
     print("*******Done Writing Index to Disk*******")
 
-    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath, index.doc_length_A) # can change to just be index once it verifiably works
+    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath, index.doc_length_A, index.doc_length_D) # can change to just be index once it verifiably works
 
     retrievalOption = "-1"
     while (retrievalOption != "1" and retrievalOption != "2"):
@@ -155,14 +158,14 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     wqt = max[0.1, ln((N-dft+0.5)/(dft+0.5))]
     wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
     L_d = 1
-    doc_length_d = # of tokens in doc d TODO: must implement a way to retrieve/calc
+    doc_length_d = # of tokens in doc d
     doc_length_A = average # of tokens in any doc"""
     N = len(dir)
     accumulators = {}
     priority_queue = []
     L_d = 1
     doc_length_A = index.doc_length_A
-    doc_length_d = 1 # TODO: must implement a way to retrieve actual
+    doc_length_d = 1
     query = query.split()
     for t in query:
         print("t before processing:", t)
@@ -175,6 +178,7 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
         print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
         for d in t_postings:
             tftd = d.tftd
+            doc_length_d = index.doc_length_D[d.doc_id]
             wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
             print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
             A_d = 0
