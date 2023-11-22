@@ -126,17 +126,20 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath, index.doc_length_A) # can change to just be index once it verifiably works
 
     retrievalOption = "-1"
-    while (retrievalOption != "1" or retrievalOption != "2"):
+    while (retrievalOption != "1" and retrievalOption != "2"):
         retrievalOption = input("Ranked (1) or Probabilistic (2) Retrieval? Exit (0): ")
         if retrievalOption == "0":
             return
-        if retrievalOption != "1" or retrievalOption != "2":
+        if retrievalOption != "1" and retrievalOption != "2":
             print("Invalid input. Try again...")
 
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         print("query:", query)
-        result = ranked_retrieval(diskIndex, token_processor, query, dir)
+        if retrievalOption == 1:
+            result = ranked_retrieval(diskIndex, token_processor, query, dir)
+        else:
+            result = probabilistic_retrieval(diskIndex, token_processor, query, dir)
         if len(result) == 0:
             print("No results")
         else:
@@ -150,11 +153,11 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
     """The same as ranked retrieval but we have different computations for wdt, wqt, and L_d
     wqt = max[0.1, ln((N-dft+0.5)/(dft+0.5))]
-    wdt = (2.2*tftd)/(1.2*(0.25+0.75*(docLength_d/docLength_A))+tftd)
+    wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
     L_d = 1
-    docLength_d = # of tokens in doc d TODO: must implement a way to retrieve/calc
-    docLength_A = average # of tokens in any doc TODO: must implement->possibly at index creation
-                and make it a index field/property"""
+    doc_length_d = # of tokens in doc d TODO: must implement a way to retrieve/calc
+    doc_length_A = average # of tokens in any doc"""
+    doc_length_A = index.doc_length_A
     return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
@@ -213,7 +216,7 @@ if __name__ == "__main__":
 
     dir = menu()
     query_type = "-1"
-    while query_type != "1" or query_type != "2":
+    while query_type != "1" and query_type != "2":
         query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
         if query_type == "1":
             boolean_queries(dir, diskIndexPath, vocabDBPath)
