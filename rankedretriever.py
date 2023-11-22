@@ -162,7 +162,7 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     priority_queue = []
     L_d = 1
     doc_length_A = index.doc_length_A
-    doc_length_d = 0
+    doc_length_d = 1 # TODO: must implement a way to retrieve actual
     query = query.split()
     for t in query:
         print("t before processing:", t)
@@ -173,6 +173,19 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
             continue
         wqt = max(0.1, math.log((N-dft+0.5)/(dft+0.5)))
         print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
+        for d in t_postings:
+            tftd = d.tftd
+            wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
+            print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
+            A_d = 0
+            if d.doc_id not in accumulators:
+                A_d = wqt * wdt
+                accumulators[d.doc_id] = A_d
+            else:
+                A_d = accumulators[d.doc_id]
+                A_d += wqt * wdt
+                accumulators[d.doc_id] = A_d
+
     return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
