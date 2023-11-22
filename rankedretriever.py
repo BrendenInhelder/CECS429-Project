@@ -16,14 +16,15 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
     token_processor = IntermediateTokenProcessor()
     # token_processor = BasicTokenProcessor()
     positional_inverted_index = PositionalInvertedIndex()
-
-    currentDocNum = 0
+    doc_length_A = 0 # average num of tokens for any doc, useful for probabilistic retrieval
     eucDistances = []
     for doc in corpus:
         docTermFreq = {}
         position = 0
+        doc_length_d = 0 # num of tokens for doc d
         token_stream = englishtokenstream.EnglishTokenStream(doc.get_content())
         for token in token_stream:
+            doc_length_d += 1
             terms = token_processor.process_token(token) 
             if type(terms) is not list:
                 positional_inverted_index.add_term(terms, doc.id, position)
@@ -49,12 +50,17 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             eucDist += (wdt ** 2)
         eucDist = math.sqrt(eucDist)
         eucDistances.append(eucDist)
+        # update the average doc length, still need to average at end
+        doc_length_A += doc_length_d
     # storing all euclidian distances in binary file
     bin_format = 'd'
     with open("docWeights.bin", 'wb') as doc_weights_file:
         for eucDistance in eucDistances:
             packed_data = struct.pack(bin_format, eucDistance)
             doc_weights_file.write(packed_data)
+    # final average of doc lengths for any doc
+    doc_length_A = doc_length_A / len(dir)
+    positional_inverted_index.set_doc_length_A(doc_length_A)
     return positional_inverted_index
 
 def menu():
@@ -117,7 +123,7 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
     diw.writeIndex(index, diskIndexPath, vocabDBPath)
     print("*******Done Writing Index to Disk*******")
 
-    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
+    diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath, index.doc_length_A) # can change to just be index once it verifiably works
 
     retrievalOption = "-1"
     while (retrievalOption != "1" or retrievalOption != "2"):

@@ -9,10 +9,11 @@ class DiskPositionalIndex(Index):
     """Implements an Index using an inverted index that exists on Disk. 
     It Is constructed in a binary file and this class retrieves them."""
 
-    def __init__(self, index_path : Path, vocab_path : Path):
+    def __init__(self, index_path : Path, vocab_path : Path, doc_length_A : float):
         """Initializes with file locations to be used for retrieval"""
         self.index_path = index_path
         self.vocab_path = vocab_path
+        self.doc_length_A = doc_length_A
 
     def get_postings(self, term : str) -> Iterable[Posting]:
         """For a given term, retrieves the postings WITHOUT positions from disk"""

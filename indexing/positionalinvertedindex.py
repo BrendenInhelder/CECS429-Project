@@ -11,6 +11,7 @@ class PositionalInvertedIndex(Index):
         """Constructs an empty inverted index"""
         self.vocabulary = set()
         self.index = {} # {term1: [Posting(id1,[list of positions]), Posting(id2, [list of positions])],
+        self.doc_length_A = 0
 
     def add_term(self, term : str, doc_id : int, position : int):
         """Adds a document id to the dictionary of the correct term in the index 
@@ -42,3 +43,6 @@ class PositionalInvertedIndex(Index):
         vocab = list(self.vocabulary)
         vocab.sort()
         return vocab
+    
+    def set_doc_length_A(self, doc_length_A : float):
+        self.doc_length_A = doc_length_A
