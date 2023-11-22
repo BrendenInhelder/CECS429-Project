@@ -185,8 +185,13 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
                 A_d = accumulators[d.doc_id]
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
+    for doc_id in accumulators:
+        # since L_d has been defined as 1 by professor...A_d remains as score
+        A_d = accumulators[doc_id]
+        heapq.heappush(priority_queue, (A_d, doc_id))
+    top_10 = heapq.nlargest(10, priority_queue)
+    return top_10
 
-    return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
@@ -235,12 +240,12 @@ if __name__ == "__main__":
     # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
 
     # default paths for all nps index and vocab
-    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
-    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
 
     # paths for NPS10
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
+    # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
+    # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     dir = menu()
     query_type = "-1"
