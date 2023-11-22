@@ -157,7 +157,22 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     L_d = 1
     doc_length_d = # of tokens in doc d TODO: must implement a way to retrieve/calc
     doc_length_A = average # of tokens in any doc"""
+    N = len(dir)
+    accumulators = {}
+    priority_queue = []
+    L_d = 1
     doc_length_A = index.doc_length_A
+    doc_length_d = 0
+    query = query.split()
+    for t in query:
+        print("t before processing:", t)
+        t = token_processor.process_token(t)[-1]
+        t_postings = index.get_postings(t)
+        dft = len(t_postings)
+        if dft == 0:
+            continue
+        wqt = max(0.1, math.log((N-dft+0.5)/(dft+0.5)))
+        print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
     return []
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
@@ -169,7 +184,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     query = query.split()
     for t in query:
         print("t before processing:", t)
-        t = token_processor.process_token(t)[0]
+        t = token_processor.process_token(t)[-1] # TODO: is using [0] a problem? This will not be compatible with hyphens in query...try -1
         t_postings = index.get_postings(t)
         dft = len(t_postings)
         if dft == 0:
