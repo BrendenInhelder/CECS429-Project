@@ -9,7 +9,7 @@ class DiskPositionalIndex(Index):
     """Implements an Index using an inverted index that exists on Disk. 
     It Is constructed in a binary file and this class retrieves them."""
 
-    def __init__(self, index_path : Path, vocab_path : Path, doc_length_A : float, doc_length_D : dict):
+    def __init__(self, index_path : Path, vocab_path : Path, doc_length_A : float = None, doc_length_D : dict = None):
         """Initializes with file locations to be used for retrieval"""
         self.index_path = index_path
         self.vocab_path = vocab_path
