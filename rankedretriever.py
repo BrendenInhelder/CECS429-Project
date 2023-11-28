@@ -47,7 +47,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         # TODO: somehow Euclidean distance is far off from desired
         eucDist = 0
         for term in docTermFreq:
-            wdt = 1 + math.log10(docTermFreq[term])
+            wdt = 1 + math.log(docTermFreq[term])
             eucDist += (wdt ** 2)
         eucDist = math.sqrt(eucDist)
         eucDistances.append(eucDist)
@@ -139,7 +139,7 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         print("query:", query)
-        if retrievalOption == 1:
+        if retrievalOption == "1":
             result = ranked_retrieval(diskIndex, token_processor, query, dir)
         else:
             result = probabilistic_retrieval(diskIndex, token_processor, query, dir)
@@ -153,6 +153,7 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+    print("**********Probabilistic Retrieval*********")
     # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
     """The same as ranked retrieval but we have different computations for wdt, wqt, and L_d
     wqt = max[0.1, ln((N-dft+0.5)/(dft+0.5))]
@@ -197,6 +198,7 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     return top_10
 
 def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+    print("**********Basic Ranked Retrieval*********")
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
     # A_d: accumulator for doc d, += wqt x wdt, priority queue: put A_d / L_d for each doc in this to get best ones
