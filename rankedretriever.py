@@ -62,6 +62,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             doc_weights_file.write(packed_data)
     # final average of doc lengths for any doc
     doc_length_A = doc_length_A / len(dir)
+    # TODO: write the doc lengths and average doc length to new binary file docLengths.bin
     positional_inverted_index.set_doc_length_A(doc_length_A)
     positional_inverted_index.set_doc_length_D(doc_length_D)
     return positional_inverted_index
