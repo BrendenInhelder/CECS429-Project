@@ -40,6 +40,8 @@ class DirectoryCorpus:
         return len(self._documents)
 
     def get_document(self, doc_id) -> Document:
+        if self._documents is None:
+            self._documents = self._read_documents()
         return self._documents[doc_id]
 
     def _read_documents(self) -> list[Document]:

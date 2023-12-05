@@ -98,18 +98,8 @@ def get_folder_path() -> Path:
     return folder_path
 
 def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
-    # TODO: must apply new changes that skip indexing
     """performs boolean queries"""
-    # Build the index over this directory
-    print("***************Indexing*****************")
-    index = positional_inverted_index_corpus(d)
-    print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
-
-    diw = DiskIndexWriter()
-    diw.writeIndex(index, diskIndexPath, vocabDBPath)
-    print("*******Done Writing Index to Disk*******")
-
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
 
     query = input('Enter a boolean query you would like to search for(\'quit\' to exit): ')
@@ -126,7 +116,7 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
 def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path, docWeightsPath : Path, docLengthsPath : Path):
-    """performs ranked retrieval queries, TODO: implement ranked_retrieval"""
+    """performs ranked retrieval queries"""
     token_processor = IntermediateTokenProcessor()
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
 
@@ -137,7 +127,6 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
             return
         if retrievalOption != "1" and retrievalOption != "2":
             print("Invalid input. Try again...")
-
     query = input('Enter a bag of words you would like to search for(\'quit\' to exit): ')
     while query != 'quit':
         print("query:", query)
@@ -156,7 +145,6 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
 def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus, docLengthsPath : Path) -> list:
     print("**********Probabilistic Retrieval*********")
-    # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
     """The same as ranked retrieval but we have different computations for wdt, wqt, and L_d
     wqt = max[0.1, ln((N-dft+0.5)/(dft+0.5))]
     wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
@@ -187,7 +175,6 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
         for d in t_postings:
             tftd = d.tftd
             # obtain current doc's length
-            # with open("docLengths.bin", "rb") as doc_lengths_file:
             with open(docLengthsPath, "rb") as doc_lengths_file:
                 offset = d.doc_id * 8 # doubles are stored in this file, so doc_id * 8 gets the current docs length
                 doc_lengths_file.seek(offset)
@@ -239,7 +226,6 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
                 A_d = accumulators[d.doc_id]
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
-    # with open("docWeights.bin", "rb") as doc_weights_file:
     with open(docWeightsPath, "rb") as doc_weights_file:
         for doc_id in accumulators:
             offset = doc_id * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
@@ -296,7 +282,6 @@ if __name__ == "__main__":
     docLengthsPath = folder_path / "docLengths.bin"
 
     build_index(corpus_dir)
-
     query_type = "-1"
     while query_type != "1" and query_type != "2":
         query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
