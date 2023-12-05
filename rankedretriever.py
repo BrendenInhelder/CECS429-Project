@@ -60,7 +60,7 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             packed_data = struct.pack(bin_format, eucDistance)
             doc_weights_file.write(packed_data)
     # final average of doc lengths for any doc
-    doc_length_A = doc_length_A / len(dir)
+    doc_length_A = doc_length_A / len(corpus_dir)
     # save the doc lengths and average doc length to disk file docLengths.bin
     # TODO: fix path to be the folder of their choosing which also holds vocab and index on disk
     with open("docLengths.bin", "wb") as doc_lengths_file:
@@ -72,26 +72,31 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         doc_lengths_file.write(packed_data)
     return positional_inverted_index
 
-def menu():
-    print("Welcome to my search engine!")
+def corpus_path_menu():
     userChoice = input("What kind of files will you be indexing?\n\t1) .txt\n\t2) .json\n\tChoice: ")
     if userChoice == "1":
-        corpus_path = getFilePath()
-        d = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
-        return d
+        corpus_path = get_corpus_path()
+        corpus_dir = DirectoryCorpus.load_text_directory(corpus_path, ".txt")
+        return corpus_dir
     elif userChoice == "2":
-        corpus_path = getFilePath()
-        d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-        return d
+        corpus_path = get_corpus_path()
+        corpus_dir = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+        return corpus_dir
     else:
         print("file type not supported, try again")
-        menu()
+        corpus_path_menu()
     
-def getFilePath() -> Path:
+def get_corpus_path() -> Path:
     userPath = input("Provide the path to index (Windows: use double backslashes or single forwardslashes): ")
     userPath = userPath.replace('"', '')
     corpus_path = Path(userPath)
     return corpus_path
+
+def get_folder_path() -> Path:
+    userPath = input("Provide the path to on-disk folder (Windows: use double backslashes or single forwardslashes): ")
+    userPath = userPath.replace('"', '')
+    folder_path = Path(userPath)
+    return folder_path
 
 def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
     """performs boolean queries"""
@@ -258,24 +263,28 @@ if __name__ == "__main__":
     # path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
     # path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
     # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
+    # path for corpus (all): "C:\\Users\\Brend\\CECS429_Project_Files\\all-nps-sites"
+    # path for on-disk folder: "C:\\Users\\Brend\\CECS429_Project_Files"
 
     # default paths for all nps index and vocab
-    diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\index_on_disk.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Desktop\\429_Project_Data\\vocabulary.db")
+    diskIndexPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\index_on_disk.bin")
+    vocabDBPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\vocabulary.db")
 
     # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
     # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
-    dir = menu()
+    print("Welcome to my search engine!")
+    corpus_dir = corpus_path_menu()
+    folder_path = get_folder_path()
     query_type = "-1"
     while query_type != "1" and query_type != "2":
         query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
         if query_type == "1":
-            boolean_queries(dir, diskIndexPath, vocabDBPath)
+            boolean_queries(corpus_dir, diskIndexPath, vocabDBPath)
             break
         elif query_type == "2":
-            ranked_queries(dir, diskIndexPath, vocabDBPath)
+            ranked_queries(corpus_dir, diskIndexPath, vocabDBPath)
             break
         elif query_type == "0":
             break
