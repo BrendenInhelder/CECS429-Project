@@ -265,16 +265,8 @@ if __name__ == "__main__":
     # path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
     # path for 10 ch(txt): "C:\\Users\\Brend\\OneDrive\\Desktop\\MD10"
     # path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
-    # path for all: "C:\\Users\\Brend\\Documents\\all-nps-sites"
     # path for corpus (all): "C:\\Users\\Brend\\CECS429_Project_Files\\all-nps-sites"
     # path for on-disk folder: "C:\\Users\\Brend\\CECS429_Project_Files"
-
-    # default paths for all nps index and vocab
-    #TODO: "calculate" these paths given the folder directory
-    diskIndexPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\index_on_disk.bin")
-    vocabDBPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\vocabulary.db")
-    docWeightsPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\docWeights.bin")
-    docLengthsPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\docLengths.bin")
 
     # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
@@ -283,7 +275,12 @@ if __name__ == "__main__":
     print("Welcome to my search engine!")
     corpus_dir = corpus_path_menu()
     folder_path = get_folder_path()
-    # diskIndexPath = folder_path + "/"
+
+    diskIndexPath = folder_path / "index_on_disk.bin"
+    vocabDBPath = folder_path / "vocabulary.db"
+    docWeightsPath = folder_path / "docWeights.bin"
+    docLengthsPath = folder_path / "docLengths.bin"
+
     query_type = "-1"
     while query_type != "1" and query_type != "2":
         query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
