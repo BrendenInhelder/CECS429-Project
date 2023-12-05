@@ -125,16 +125,16 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
             print("Postings length:", len(result))
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
-def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
+def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path, docWeightsPath : Path, docLengthsPath : Path):
     """performs ranked retrieval queries, TODO: implement ranked_retrieval"""
     # Build the index over this directory
     print("***************Indexing*****************")
-    index = positional_inverted_index_corpus(dir)
+    # index = positional_inverted_index_corpus(dir)
     print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
 
-    diw = DiskIndexWriter()
-    diw.writeIndex(index, diskIndexPath, vocabDBPath)
+    # diw = DiskIndexWriter()
+    # diw.writeIndex(index, diskIndexPath, vocabDBPath)
     print("*******Done Writing Index to Disk*******")
 
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
@@ -151,9 +151,9 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
     while query != 'quit':
         print("query:", query)
         if retrievalOption == "1":
-            result = ranked_retrieval(diskIndex, token_processor, query, dir)
+            result = ranked_retrieval(diskIndex, token_processor, query, dir, docWeightsPath)
         else:
-            result = probabilistic_retrieval(diskIndex, token_processor, query, dir)
+            result = probabilistic_retrieval(diskIndex, token_processor, query, dir, docLengthsPath)
         if len(result) == 0:
             print("No results")
         else:
@@ -163,7 +163,7 @@ def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pa
 
         query = input('Enter a term you would like to search for(\'quit\' to exit): ')
 
-def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus, docLengthsPath : Path) -> list:
     print("**********Probabilistic Retrieval*********")
     # TODO: implement the OKAPI BM-25 algorithm to return the 10 most probable documents for a given query
     """The same as ranked retrieval but we have different computations for wdt, wqt, and L_d
@@ -177,7 +177,8 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     priority_queue = []
     doc_length_A = -1
     # obtain average doc length
-    with open("docLengths.bin", "rb") as doc_lengths_file:
+    # with open("docLengths.bin", "rb") as doc_lengths_file:
+    with open(docLengthsPath, "rb") as doc_lengths_file:
         offset = len(dir) * 8 # doubles are stored in this file, so num of docs * 8 will be last element in file (average)
         doc_lengths_file.seek(offset)
         doc_length_A = struct.unpack('d', doc_lengths_file.read(8))[0]
@@ -195,7 +196,8 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
         for d in t_postings:
             tftd = d.tftd
             # obtain current doc's length
-            with open("docLengths.bin", "rb") as doc_lengths_file:
+            # with open("docLengths.bin", "rb") as doc_lengths_file:
+            with open(docLengthsPath, "rb") as doc_lengths_file:
                 offset = d.doc_id * 8 # doubles are stored in this file, so doc_id * 8 gets the current docs length
                 doc_lengths_file.seek(offset)
                 doc_length_d = struct.unpack('d', doc_lengths_file.read(8))[0]
@@ -216,7 +218,7 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     top_10 = heapq.nlargest(10, priority_queue)
     return top_10
 
-def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus) -> list:
+def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : str, dir : DirectoryCorpus, docWeightsPath : Path) -> list:
     print("**********Basic Ranked Retrieval*********")
     # t: term, wqt: weight for term t, ln: natural log (some library method), dft: document freq for that term (len(list of postings))
     # wdt: weight for doc d for each term t, tftd: term t freq for that term t in doc d
@@ -246,7 +248,8 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
                 A_d = accumulators[d.doc_id]
                 A_d += wqt * wdt
                 accumulators[d.doc_id] = A_d
-    with open("docWeights.bin", "rb") as doc_weights_file:
+    # with open("docWeights.bin", "rb") as doc_weights_file:
+    with open(docWeightsPath, "rb") as doc_weights_file:
         for doc_id in accumulators:
             offset = doc_id * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
             doc_weights_file.seek(offset)
@@ -267,8 +270,11 @@ if __name__ == "__main__":
     # path for on-disk folder: "C:\\Users\\Brend\\CECS429_Project_Files"
 
     # default paths for all nps index and vocab
+    #TODO: "calculate" these paths given the folder directory
     diskIndexPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\index_on_disk.bin")
     vocabDBPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\vocabulary.db")
+    docWeightsPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\docWeights.bin")
+    docLengthsPath = Path("C:\\Users\\Brend\\CECS429_Project_Files\\docLengths.bin")
 
     # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
@@ -277,6 +283,7 @@ if __name__ == "__main__":
     print("Welcome to my search engine!")
     corpus_dir = corpus_path_menu()
     folder_path = get_folder_path()
+    # diskIndexPath = folder_path + "/"
     query_type = "-1"
     while query_type != "1" and query_type != "2":
         query_type = input("Boolean (1) or Ranked (2) Queries? Exit (0): ")
@@ -284,7 +291,7 @@ if __name__ == "__main__":
             boolean_queries(corpus_dir, diskIndexPath, vocabDBPath)
             break
         elif query_type == "2":
-            ranked_queries(corpus_dir, diskIndexPath, vocabDBPath)
+            ranked_queries(corpus_dir, diskIndexPath, vocabDBPath, docWeightsPath, docLengthsPath)
             break
         elif query_type == "0":
             break
