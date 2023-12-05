@@ -55,15 +55,14 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
         doc_length_D[doc.id] = doc_length_d
     # storing all euclidian distances in binary file
     bin_format = 'd'
-    with open("docWeights.bin", 'wb') as doc_weights_file:
+    with open(docWeightsPath, 'wb') as doc_weights_file:
         for eucDistance in eucDistances:
             packed_data = struct.pack(bin_format, eucDistance)
             doc_weights_file.write(packed_data)
     # final average of doc lengths for any doc
     doc_length_A = doc_length_A / len(corpus_dir)
     # save the doc lengths and average doc length to disk file docLengths.bin
-    # TODO: fix path to be the folder of their choosing which also holds vocab and index on disk
-    with open("docLengths.bin", "wb") as doc_lengths_file:
+    with open(docLengthsPath, "wb") as doc_lengths_file:
         for doc_id in doc_length_D:
             packed_data = struct.pack(bin_format, doc_length_D[doc_id])
             doc_lengths_file.write(packed_data)
@@ -87,7 +86,7 @@ def corpus_path_menu():
         corpus_path_menu()
     
 def get_corpus_path() -> Path:
-    userPath = input("Provide the path to index (Windows: use double backslashes or single forwardslashes): ")
+    userPath = input("Provide path to the corpus (Windows: use double backslashes or single forwardslashes): ")
     userPath = userPath.replace('"', '')
     corpus_path = Path(userPath)
     return corpus_path
@@ -99,6 +98,7 @@ def get_folder_path() -> Path:
     return folder_path
 
 def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path):
+    # TODO: must apply new changes that skip indexing
     """performs boolean queries"""
     # Build the index over this directory
     print("***************Indexing*****************")
@@ -127,16 +127,7 @@ def boolean_queries(d : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Pat
 
 def ranked_queries(dir : DirectoryCorpus, diskIndexPath : Path, vocabDBPath : Path, docWeightsPath : Path, docLengthsPath : Path):
     """performs ranked retrieval queries, TODO: implement ranked_retrieval"""
-    # Build the index over this directory
-    print("***************Indexing*****************")
-    # index = positional_inverted_index_corpus(dir)
-    print("************Done Indexing***************")
     token_processor = IntermediateTokenProcessor()
-
-    # diw = DiskIndexWriter()
-    # diw.writeIndex(index, diskIndexPath, vocabDBPath)
-    print("*******Done Writing Index to Disk*******")
-
     diskIndex = DiskPositionalIndex(diskIndexPath, vocabDBPath) # can change to just be index once it verifiably works
 
     retrievalOption = "-1"
@@ -260,6 +251,27 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     top_10 = heapq.nlargest(10, priority_queue)
     return top_10
 
+def build_index(dir : DirectoryCorpus):
+    user_choice = input("Would you like to build the index (1) or reuse existing (2)? ")
+    if user_choice == "1":
+        # Build the index over this directory
+        print("***************Indexing*****************")
+        index = positional_inverted_index_corpus(dir)
+        print("************Done Indexing***************")
+        print("*********Writing Index to Disk**********")
+        diw = DiskIndexWriter()
+        diw.writeIndex(index, diskIndexPath, vocabDBPath)
+        print("*******Done Writing Index to Disk*******")
+        return
+    elif user_choice == "2":
+        print("Reusing existing index...")
+        return
+    else:
+        print("Invalid option. Try again...")
+        build_index(dir)
+        return
+
+
 if __name__ == "__main__":
     # Testing Purposes #
     # path for 10 nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPS10"
@@ -267,12 +279,14 @@ if __name__ == "__main__":
     # path for single nps(json): "C:\\Users\\Brend\\OneDrive\\Desktop\\NPSSingle"
     # path for corpus (all): "C:\\Users\\Brend\\CECS429_Project_Files\\all-nps-sites"
     # path for on-disk folder: "C:\\Users\\Brend\\CECS429_Project_Files"
+    # copied path for on-disk folder: "C:\\Users\\Brend\\CECS429_Project_Files - Copy"
 
     # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
     # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
 
     print("Welcome to my search engine!")
+
     corpus_dir = corpus_path_menu()
     folder_path = get_folder_path()
 
@@ -280,6 +294,8 @@ if __name__ == "__main__":
     vocabDBPath = folder_path / "vocabulary.db"
     docWeightsPath = folder_path / "docWeights.bin"
     docLengthsPath = folder_path / "docLengths.bin"
+
+    build_index(corpus_dir)
 
     query_type = "-1"
     while query_type != "1" and query_type != "2":
