@@ -44,7 +44,6 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
                         docTermFreq[term] += 1
             position += 1
         # calculate Euclidian Distance for current doc
-        # TODO: somehow Euclidean distance is far off from desired
         eucDist = 0
         for term in docTermFreq:
             wdt = 1 + math.log(docTermFreq[term])
@@ -62,9 +61,17 @@ def positional_inverted_index_corpus(corpus: DocumentCorpus) -> Index:
             doc_weights_file.write(packed_data)
     # final average of doc lengths for any doc
     doc_length_A = doc_length_A / len(dir)
-    # TODO: write the doc lengths and average doc length to new binary file docLengths.bin
-    positional_inverted_index.set_doc_length_A(doc_length_A)
-    positional_inverted_index.set_doc_length_D(doc_length_D)
+    print("doc_length_A:", doc_length_A)
+    # TODO: fix path to be the folder of their choosing which also holds vocab and index on disk
+    with open("docLengths.bin", "wb") as doc_lengths_file:
+        for doc_id in doc_length_D:
+            packed_data = struct.pack(bin_format, doc_length_D[doc_id])
+            doc_lengths_file.write(packed_data)
+        # write average to the end of the file
+        packed_data = struct.pack(bin_format, doc_length_A)
+        doc_lengths_file.write(packed_data)
+    # positional_inverted_index.set_doc_length_A(doc_length_A)
+    # positional_inverted_index.set_doc_length_D(doc_length_D)
     return positional_inverted_index
 
 def menu():
@@ -166,7 +173,13 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     accumulators = {}
     priority_queue = []
     L_d = 1
-    doc_length_A = index.doc_length_A
+    doc_length_A = -1
+    # doc_length_A = index.doc_length_A
+    with open("docLengths.bin", "rb") as doc_lengths_file:
+        offset = len(dir) * 8 # doubles are stored in this file, so num of docs * 8 will be last element in file (average)
+        doc_lengths_file.seek(offset)
+        doc_length_A = struct.unpack('d', doc_lengths_file.read(8))[0]
+        print("doc_length_A:", doc_length_A)
     doc_length_d = 1
     query = query.split()
     for t in query:
@@ -180,7 +193,12 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
         print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
         for d in t_postings:
             tftd = d.tftd
-            doc_length_d = index.doc_length_D[d.doc_id]
+            # doc_length_d = index.doc_length_D[d.doc_id]
+            with open("docLengths.bin", "rb") as doc_lengths_file:
+                offset = d.doc_id * 8 # doubles are stored in this file, so doc_id * 8 gets the current docs length
+                doc_lengths_file.seek(offset)
+                doc_length_d = struct.unpack('d', doc_lengths_file.read(8))[0]
+                # print("doc_length_A:", doc_length_A)
             wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
             print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
             A_d = 0
@@ -253,6 +271,8 @@ if __name__ == "__main__":
     # paths for NPS10
     # diskIndexPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\new_binary_file.bin")
     # vocabDBPath = Path("C:\\Users\\Brend\\OneDrive\\Documents\\vocabulary.db")
+
+    # doc_length_A: 377.1571611009972
 
     dir = menu()
     query_type = "-1"
