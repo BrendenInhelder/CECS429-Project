@@ -164,14 +164,14 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
     doc_length_d = 1
     query = query.split()
     for t in query:
-        print("t before processing:", t)
+        # print("t before processing:", t)
         t = token_processor.process_token(t)[-1]
         t_postings = index.get_postings(t)
         dft = len(t_postings)
         if dft == 0:
             continue
         wqt = max(0.1, math.log((N-dft+0.5)/(dft+0.5)))
-        print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
+        # print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
         for d in t_postings:
             tftd = d.tftd
             # obtain current doc's length
@@ -180,7 +180,7 @@ def probabilistic_retrieval(index : Index, token_processor : TokenProcessor, que
                 doc_lengths_file.seek(offset)
                 doc_length_d = struct.unpack('d', doc_lengths_file.read(8))[0]
             wdt = (2.2*tftd)/(1.2*(0.25+0.75*(doc_length_d/doc_length_A))+tftd)
-            print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
+            # print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
             A_d = 0
             if d.doc_id not in accumulators:
                 A_d = wqt * wdt
@@ -206,18 +206,18 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
     priority_queue = [] # (A_d/L_d, doc_id)
     query = query.split()
     for t in query:
-        print("t before processing:", t)
+        # print("t before processing:", t)
         t = token_processor.process_token(t)[-1] # TODO: is using [0] a problem? This will not be compatible with hyphens in query...try -1
         t_postings = index.get_postings(t)
         dft = len(t_postings)
         if dft == 0:
             continue
         wqt = math.log(1+(N/dft))
-        print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
+        # print(dft, " postings for term \"", t, "\" with wQt = ", wqt, sep="")
         for d in t_postings:
             tftd = d.tftd
             wdt = 1 + math.log(tftd)
-            print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
+            # print("wDt(", dir.get_document(d.doc_id).title, " (", dir.get_document(d.doc_id).file_name, ", ID ", dir.get_document(d.doc_id).id, ")", ") = ", wdt, sep="")
             A_d = 0
             if d.doc_id not in accumulators:
                 A_d = wqt * wdt
@@ -231,7 +231,7 @@ def ranked_retrieval(index : Index, token_processor : TokenProcessor, query : st
             offset = doc_id * 8 # doubles are stored in this file, so id * 8 will be corresponding doc's L_d
             doc_weights_file.seek(offset)
             L_d = struct.unpack('d', doc_weights_file.read(8))[0]
-            print("Ld(", dir.get_document(doc_id).title, " (", dir.get_document(doc_id).file_name, ", ID ", dir.get_document(doc_id).id, ")", ") = ", L_d, sep="")
+            # print("Ld(", dir.get_document(doc_id).title, " (", dir.get_document(doc_id).file_name, ", ID ", dir.get_document(doc_id).id, ")", ") = ", L_d, sep="")
             A_d = accumulators[doc_id]
             heapq.heappush(priority_queue, (A_d / L_d, doc_id))
     top_10 = heapq.nlargest(10, priority_queue)
